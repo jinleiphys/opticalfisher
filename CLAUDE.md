@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nuclear physics research computing the **effective dimensionality (D_eff)** of optical potentials in nuclear scattering. Core result: elastic scattering can only constrain D_eff ≈ 1.5 parameter combinations out of 9 (or 11 with spin-orbit) in the KD02 optical potential, explaining the Igo ambiguity. Target: PRL publication.
 
-**Strategy: Numerov method only.** Neural network scripts exist as reference but are not the active development path.
+**Strategy: Numerov method exclusively.** All computation uses the Numerov solver with finite-difference gradients, validated against FRESCO. Neural network scripts are historical artifacts only.
 
 The code supports both **spin-0** (9-param, central only) and **spin-1/2** (11-param, with spin-orbit coupling) scattering, including analyzing power Ay, reaction cross section σ_R, and total cross section σ_T.
 
@@ -33,11 +33,19 @@ python analysis/deff_scan_kd02_9params.py         # spin-0, absolute derivatives
 # Extended scan: spin-1/2, 11 params, multiple observables (dσ/dΩ, Ay, σ_R, σ_T)
 python analysis/deff_scan_extended.py             # ← RECOMMENDED for referee response
 
-# Generate publication figures
-python paper/plot_fig1_final.py   # D_eff heatmap
-python paper/plot_fig2_final.py   # D_eff vs mass/energy/condition
-python paper/plot_fig3_final.py   # Eigenvector analysis (currently uses NN — needs Numerov rewrite)
-python paper/plot_fig4_final.py   # Information geometry
+# Multi-energy combined Fisher analysis (post-processing)
+python analysis/deff_multi_energy.py
+
+# Angle-resolved sensitivity analysis
+python analysis/angle_resolved_sensitivity.py
+
+# Generate publication figures (all Numerov-based, no NN dependencies)
+python paper/plot_fig1_final.py           # D_eff heatmap
+python paper/plot_fig2_final.py           # D_eff vs mass/energy/condition
+python paper/plot_fig3_final.py           # Eigenvector analysis (Numerov)
+python paper/plot_fig4_final.py           # Information geometry (real gradients)
+python paper/plot_fig_complementarity.py  # Observable complementarity + multi-E
+python paper/plot_fig_sensitivity.py      # Angle-resolved sensitivity
 
 # Sync figures/LaTeX to Overleaf
 ./sync_overleaf.sh
@@ -103,9 +111,12 @@ E2 = 1.44            # MeV·fm (Coulomb constant)
 ## Data Files
 
 - `data/deff_scan_kd02_9params_log.json` — Spin-0, 9-param results (Numerov + log-derivatives)
-- `data/deff_scan_extended.json` — **Spin-1/2, 11-param results with multiple observables** (for referee response)
+- `data/deff_scan_extended.json` — **Spin-1/2, 11-param results with multiple observables + full Fisher matrices**
+- `data/deff_gradients_representative.json` — Full gradient matrices for representative cases
+- `data/deff_multi_energy.json` — Multi-energy combined Fisher analysis results
+- `data/angle_sensitivity.json` — Angle-resolved sensitivity S_i(theta) on dense grid
 - `data/deff_scan_data.json` — Plotting-ready format used by `paper/plot_fig*.py`
-- `data/deff_nn_9params.json` — Neural network results (reference only, known 36% discrepancy)
+- `data/deff_nn_9params.json` — Neural network results (historical reference only)
 
 ## Overleaf Sync
 

@@ -1,0 +1,134 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue]{hyperref}
+
+\definecolor{refcolor}{rgb}{0.0, 0.0, 0.6}
+\definecolor{respcolor}{rgb}{0.0, 0.4, 0.0}
+
+\newcommand{\referee}[1]{\medskip\noindent\textcolor{refcolor}{\textit{#1}}\medskip}
+\newcommand{\response}[1]{\noindent #1}
+
+\begin{document}
+
+\begin{center}
+{\Large\textbf{Response to Referee Report}}\\[10pt]
+{\large Manuscript: Scale-Invariant Information Limit in Nuclear Optical Potential Extraction}\\[5pt]
+Jin Lei\\[5pt]
+\today
+\end{center}
+
+\bigskip
+
+\noindent We thank the referee for the careful reading of the manuscript and the constructive suggestions. The referee's core criticism---that the original analysis was limited to single-energy elastic angular distributions---was entirely well-taken. We have substantially extended the analysis to include (i)~analyzing power $A_y$, (ii)~reaction cross section $\sigma_R$, (iii)~total cross section $\sigma_T$, (iv)~multi-energy combined Fisher analysis, (v)~the KD02 global parameterization with 17 energy-dependent parameters, and (vi)~angle-resolved sensitivity. We have also added a detailed comparison with the Bayesian uncertainty quantification of King \textit{et al.} [PRL \textbf{122}, 232502 (2019)], establishing the Fisher information matrix as the rigorous theoretical foundation for the empirical findings of that landmark study.
+
+The revised manuscript presents these extensions as a \textbf{step-by-step constraint analysis}, progressively adding observables and energies to decompose the constraining power of each data type. This addresses all of the referee's major and minor criticisms. Below we respond to each point in detail.
+
+\bigskip
+\section*{Major Criticisms}
+
+%=====================================================
+\subsection*{(1) Limited observable scope}
+
+\referee{The author focuses exclusively on elastic scattering angular distributions, whereas KD02 was constrained using (i) elastic-scattering angular distributions, (ii) analyzing powers, (iii) total cross sections, and (iv) average resonance parameters. If a comprehensive analysis of ALL data types still showed reduced effective parameter space, THAT would be a significant new insight.}
+
+\response{We have now extended the analysis to include all four observable types the referee lists. The revised manuscript presents a step-by-step decomposition (new Fig.~5):
+
+\begin{itemize}[noitemsep]
+\item \textbf{Step 1: Elastic $d\sigma/d\Omega$ alone}: $D_\mathrm{eff} \approx 1.2$ (50 MeV), with the 168-configuration average $D_\mathrm{eff} = 1.7 \pm 0.4$.
+\item \textbf{Step 2: $+ \sigma_R$}: $D_\mathrm{eff}$ increases by $<0.001$. A single integrated datum is overwhelmed by 17 elastic angular bins.
+\item \textbf{Step 3: $+ A_y + \sigma_T$}: $D_\mathrm{eff}$ rises from 1.18 to 1.52 for $n+^{40}$Ca. The analyzing power provides genuinely new information through the spin-flip amplitude $g(\theta)$, which probes spin-orbit interference. The spin-orbit subgroup trace increases by two orders of magnitude.
+\item \textbf{Step 4: Multi-energy (7 energies)}: $D_\mathrm{eff}$ increases to $\sim$2.1--2.5. This is the single most effective route.
+\item \textbf{Step 5: KD02 global parameterization (17 parameters)}: $D_\mathrm{eff} \approx 1.0$ of 17 global parameters. Importantly, this does \emph{not} mean that information is lost relative to Step~4---the data still determine the same local-parameter combinations at each energy. The lower $D_\mathrm{eff}$ arises because KD02 expresses each local parameter as a polynomial in energy (e.g., $V(E)$ via 4 coefficients), but the data can only pin down the leading 1--2 coefficients; the higher-order terms ($v_3$, $v_4$, $d_3$, etc.) are redundant. This is analogous to fitting a straight line with a cubic: the slope is well-determined, but the curvature coefficients are arbitrary. The KD02 functional form is over-parametrized.
+\end{itemize}
+
+The key new insight, as the referee anticipated, is precisely this: even after including ALL observable types, $D_\mathrm{eff}$ remains $\sim$2--2.5, far below the 11 local parameters. The information limit is intrinsic to the scattering physics. The step-by-step decomposition reveals \textit{which} observables contribute \textit{what}: $A_y$ lifts the spin-orbit degeneracy, multi-energy data lift the imaginary-parameter degeneracy, but single-energy $\sigma_R$ provides negligible additional constraint.
+
+The computational infrastructure now includes:
+\begin{itemize}[noitemsep]
+\item Full spin-1/2 scattering solver (\texttt{solve\_spin\_half()}) computing $(l,j)$-resolved $S$-matrix, validated against FRESCO ($|\Delta S| < 0.002$)
+\item Observables module computing $f(\theta)$, $g(\theta)$, $d\sigma/d\Omega$, $A_y = 2\mathrm{Im}(fg^*)/(|f|^2+|g|^2)$, $\sigma_R$, and $\sigma_T$
+\item Separate gradient matrices for each observable type, enabling the additive Fisher decomposition
+\end{itemize}
+}
+
+%=====================================================
+\subsection*{(2) Fisher analysis methodology concerns}
+
+\referee{The single-energy Fisher analysis does not capture (i) whether a parameter is required for globally acceptable fits, or (ii) whether a parameter is needed to reproduce energy trends. Diffuseness is primarily constrained through energy systematics, integrated observables, and correlations across energies.}
+
+\response{We now directly address both points:
+
+\textbf{(i) Multi-energy combined Fisher analysis}: The combined Fisher matrix $F_\mathrm{combined} = \sum_E F(E)$ captures the information from measurements across 7 energies (10--200 MeV). Combining elastic data alone across energies raises $D_\mathrm{eff}$ from $\sim$1.2 to $\sim$2.1--2.3 (new Fig.~5, Step 4). The energy lever arm is the key: at low energies the real potential dominates, while at high energies absorption becomes stronger, probing orthogonal parameter combinations. The imaginary subgroup $D_\mathrm{eff}$ increases from $\sim$1.1 (single energy) to $\sim$2.3 (7 energies).
+
+\textbf{(ii) KD02 global systematics}: We compute the Jacobian $J = \partial\boldsymbol{\theta}_\mathrm{local}/\partial\boldsymbol{\theta}_\mathrm{global}$ relating the 11 local parameters per energy to the 17 global KD02 parameters, and project the multi-energy Fisher matrix onto the global space: $F_\mathrm{global} = J^T F_\mathrm{combined} J$. The result ($D_\mathrm{eff} \approx 1.0$ of 17 parameters) reveals that the polynomial functional forms in KD02 introduce additional degeneracies beyond those inherent in the scattering physics.
+
+\textbf{Diffuseness}: The referee's specific concern is validated by our analysis. At a single energy, diffuseness parameters ($a_v$, $a_w$, $a_d$) contribute $<1\%$ to the dominant eigenvectors (Fig.~3). With multi-energy data, the imaginary subgroup (which includes $a_w$ and $a_d$) becomes better constrained ($D_\mathrm{eff}^\mathrm{imag}: 1.1 \to 2.3$). This quantitatively confirms the referee's statement that diffuseness is primarily constrained through energy systematics.
+}
+
+\medskip
+
+\referee{Specific suggestion: Plot angle-resolved sensitivity to diffuseness $S_a(\theta)$---backward angle effects may be washed out when summing over all angles.}
+
+\response{Done. The new Fig.~6 shows $|S_i(\theta)|$ for all 11 parameters. The referee's intuition is confirmed: diffuseness parameters $a_v$, $a_w$, and $a_d$ become most distinguishable at backward angles ($\theta > 130^\circ$), where their sensitivity curves diverge from the depth/radius parameters. The cumulative $D_\mathrm{eff}(\theta_\mathrm{max})$ shows that $\sim$90\% of the total constraining power is captured by $\theta \approx 140^\circ$. Backward-angle measurements are disproportionately valuable for breaking the parameter degeneracy---a practical recommendation for experimental design.}
+
+%=====================================================
+\subsection*{(3) Path to PRL-level impact}
+
+\referee{A comprehensive Fisher analysis should include at least (i) reaction cross sections and (ii) energy systematics.}
+
+\response{Both are now included. Additionally, we provide a new element not anticipated in the original submission: a detailed comparison with the Bayesian analysis of King \textit{et al.} [PRL \textbf{122}, 232502 (2019)]. This comparison (End Matter of the revised manuscript) demonstrates that:
+
+\begin{enumerate}[noitemsep]
+\item The Fisher information matrix provides a \textbf{rigorous theoretical foundation} for the empirical findings of King \textit{et al.}: in the Gaussian approximation, the posterior covariance equals $F^{-1}$, so our $D_\mathrm{eff} \approx 1.7$ directly explains why only $V$ and $r_v$ showed strong correlation in their MCMC scatter plots.
+\item The FIM eigenvalue hierarchy (condition number $>10^7$) predicts the elongated ``cigar-shaped'' Bayesian posterior and explains why the frequentist $\chi^2$ approach produced spurious correlations.
+\item The Fisher approach is $\sim$4000$\times$ more efficient ($2N_p + 1 = 23$ evaluations vs.\ $\sim$100,000 MCMC samples), enabling the systematic 168-configuration scan that would be prohibitively expensive with MCMC.
+\item The Fisher analysis yields provably scale-invariant quantities ($D_\mathrm{eff}$), a fundamental property difficult to establish empirically from finite MCMC chains.
+\end{enumerate}
+
+The two approaches are complementary: Fisher efficiently maps global constraint structure and proves fundamental properties, while Bayesian MCMC captures non-Gaussian posterior features. This positions the present work as the theoretical counterpart to the Bayesian UQ program of the MSU group~[6--11], establishing a unified framework for understanding parameter constraints in nuclear reactions.
+}
+
+\bigskip
+\section*{Minor Points}
+
+%=====================================================
+\subsection*{(A) Abstract framing}
+
+\referee{First sentence is misleading---the actual scope is narrower.}
+
+\response{Revised. The abstract now opens with ``How strongly can nucleon-nucleus scattering data constrain optical model potential parameters?'' and explicitly describes the step-by-step decomposition including all observable types and multi-energy analysis.}
+
+%=====================================================
+\subsection*{(B) PCA undefined}
+
+\referee{``PCA'' used without definition.}
+
+\response{Fixed: ``principal component analysis (PCA) studies'' (Introduction, paragraph 3).}
+
+%=====================================================
+\subsection*{(C) Conclusion on nuclear forces}
+
+\referee{The link between ``sloppy'' parameters and chiral nuclear forces needs refinement.}
+
+\response{Revised. The Conclusion now states: ``The `sloppy' parameter directions do not imply that these aspects of the potential are unconstrained by all data---rather, they are insensitive to single-energy scattering measurements.'' The multi-energy analysis (Fig.~5) demonstrates that combining data across energies probes orthogonal directions in parameter space, providing a constructive path forward.}
+
+\bigskip
+\section*{Summary of Changes}
+
+\begin{enumerate}[noitemsep]
+\item Extended from 9-parameter central potential to 11-parameter model including spin-orbit coupling ($V_{so}$, $W_{so}$)
+\item Added spin-1/2 scattering solver with $(l,j)$-resolved $S$-matrix, validated against FRESCO
+\item Added observables: $A_y$, $\sigma_R$, $\sigma_T$ (in addition to $d\sigma/d\Omega$)
+\item New step-by-step constraint analysis decomposing the information contribution of each observable and multi-energy data (new Fig.~5)
+\item New angle-resolved sensitivity analysis showing $|S_i(\theta)|$ for all 11 parameters (new Fig.~6)
+\item KD02 global parameter analysis (17 parameters) via Jacobian projection
+\item Detailed Fisher--Bayesian comparison in End Matter, connecting to King \textit{et al.} PRL (2019)
+\item Revised abstract, introduction, discussion, and conclusion
+\item All calculations use Numerov solver with finite-difference gradients (no neural network dependencies)
+\end{enumerate}
+
+\end{document}

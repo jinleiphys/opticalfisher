@@ -381,6 +381,7 @@ def main():
                         'rvso': rvso,
                         'avso': avso,
                         'sigma_R': float(obs_0['sigma_R']),
+                        'fisher_matrix': F.tolist(),
                         'deff_results': {},
                     }
 
@@ -416,13 +417,43 @@ def main():
                         'error': str(e),
                     })
 
-    # Save
+    # Save main results
     outdir = os.path.join(os.path.dirname(__file__), '..', 'data')
     os.makedirs(outdir, exist_ok=True)
     outfile = os.path.join(outdir, 'deff_scan_extended.json')
     with open(outfile, 'w') as f:
         json.dump(results, f, indent=2)
     print(f"\nSaved: {outfile}")
+
+    # Save gradient matrices for representative cases (for angle-resolved plots)
+    representative_cases = [
+        ('n', 40, 20, '40Ca', 50),
+        ('n', 208, 82, '208Pb', 30),
+        ('p', 40, 20, '40Ca', 50),
+        ('n', 120, 50, '120Sn', 100),
+    ]
+    grad_data = {'theta_deg': theta_deg.tolist(), 'param_names': param_names_11,
+                 'cases': []}
+    for proj_r, A_r, Z_r, name_r, E_r in representative_cases:
+        print(f"\nComputing gradients for {proj_r}+{name_r}@{E_r} MeV...")
+        try:
+            params_r, rvso_r, avso_r = get_kd02_params_11(proj_r, A_r, Z_r, E_r)
+            F_r, grads_r, obs_r, nd_r = compute_fisher_extended(
+                proj_r, A_r, Z_r, E_r, theta_deg, params_r, rvso_r, avso_r)
+            grad_data['cases'].append({
+                'projectile': proj_r, 'nucleus': name_r,
+                'A': A_r, 'Z': Z_r, 'E': E_r,
+                'params': params_r,
+                'gradients': grads_r.tolist(),
+                'fisher_matrix': F_r.tolist(),
+                'n_data': nd_r,
+            })
+        except Exception as e:
+            print(f"  ERROR: {e}")
+    grad_file = os.path.join(outdir, 'deff_gradients_representative.json')
+    with open(grad_file, 'w') as f:
+        json.dump(grad_data, f, indent=2)
+    print(f"Saved: {grad_file}")
 
     # Summary
     print("\n" + "=" * 70)

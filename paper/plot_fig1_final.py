@@ -157,7 +157,7 @@ def main():
     print("="*60)
 
     base_dir = os.path.dirname(__file__)
-    data_path = os.path.join(base_dir, 'deff_scan_data.json')
+    data_path = os.path.join(base_dir, '..', 'data', 'deff_scan_data.json')
 
     print(f"\nLoading data from {data_path}...")
     with open(data_path, 'r') as f:

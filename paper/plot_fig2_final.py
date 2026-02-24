@@ -67,8 +67,8 @@ def plot_fig2(data, save_path):
     # === (a) D_eff vs Nuclear Mass ===
     ax1 = axes[0]
     A_vals = np.array(data['nuclei_scan']['A'])
-    D_eff_vals = np.array(data['nuclei_scan']['D_eff'])
-    names = data['nuclei_scan']['name']
+    D_eff_vals = np.array(data['nuclei_scan']['D_eff_n'])
+    names = data['nuclei_scan']['nuclei']
 
     ax1.bar(range(len(A_vals)), D_eff_vals, color=COLORS['purple'],
             edgecolor='white', linewidth=1.5)
@@ -90,8 +90,8 @@ def plot_fig2(data, save_path):
 
     # === (b) D_eff vs Energy ===
     ax2 = axes[1]
-    E_vals = np.array(data['energy_scan']['E'])
-    D_eff_E = np.array(data['energy_scan']['D_eff'])
+    E_vals = np.array(data['energy_scan']['energies'])
+    D_eff_E = np.array(data['energy_scan']['D_eff_n'])
 
     ax2.plot(E_vals, D_eff_E, 'o-', color=COLORS['dark_green'],
              linewidth=2, markersize=10, markerfacecolor=COLORS['green'],
@@ -111,7 +111,7 @@ def plot_fig2(data, save_path):
 
     # === (c) Condition Number ===
     ax3 = axes[2]
-    cond_vals = np.array(data['nuclei_scan']['cond'])
+    cond_vals = np.array(data['nuclei_scan']['cond_n'])
 
     ax3.bar(range(len(A_vals)), np.log10(cond_vals), color=COLORS['lavender'],
             edgecolor='white', linewidth=1.5)
@@ -140,7 +140,7 @@ def main():
     print("="*60)
 
     base_dir = os.path.dirname(__file__)
-    data_path = os.path.join(base_dir, 'deff_scan_data.json')
+    data_path = os.path.join(base_dir, '..', 'data', 'deff_scan_data.json')
 
     print(f"\nLoading data from {data_path}...")
     with open(data_path, 'r') as f:
