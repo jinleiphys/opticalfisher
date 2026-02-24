@@ -18,6 +18,15 @@ import numpy as np
 
 
 #==============================================================================
+# Physical Constants
+#==============================================================================
+
+HBARC = 197.3269804   # MeV·fm
+M_PION = 139.5706     # MeV/c^2 (charged pion mass)
+LAMBDA_PI_SQ = (HBARC / M_PION)**2  # ≈ 2.0 fm^2 (pion Compton wavelength squared)
+
+
+#==============================================================================
 # Woods-Saxon Form Factor
 #==============================================================================
 
@@ -36,6 +45,44 @@ def woods_saxon_form_factor(r, R, a):
         f(r): form factor values
     """
     return 1.0 / (1.0 + np.exp((r - R) / a))
+
+
+def woods_saxon_derivative(r, R, a):
+    """
+    Derivative of Woods-Saxon form factor with respect to r.
+
+    df/dr = -(1/a) * f * (1 - f)
+
+    Parameters:
+        r: radial coordinate (fm), can be array
+        R: radius parameter (fm)
+        a: diffuseness parameter (fm)
+
+    Returns:
+        df/dr: derivative values (fm^-1)
+    """
+    f = woods_saxon_form_factor(r, R, a)
+    return -(1.0 / a) * f * (1.0 - f)
+
+
+def surface_form_factor(r, R, a):
+    """
+    Derivative (surface) Woods-Saxon form factor.
+
+    g(r) = -4a * df/dr = 4 * f * (1 - f)
+
+    Peaks at r = R with maximum value 1.
+
+    Parameters:
+        r: radial coordinate (fm), can be array
+        R: radius parameter (fm)
+        a: diffuseness parameter (fm)
+
+    Returns:
+        g(r): surface form factor values (dimensionless)
+    """
+    f = woods_saxon_form_factor(r, R, a)
+    return 4.0 * f * (1.0 - f)
 
 
 #==============================================================================
@@ -367,18 +414,12 @@ class KD02Potential:
         """
         Imaginary surface potential (derivative Woods-Saxon form).
 
-        W_surf = -4 * a * Wd * d/dr[f(r)]
-               = -4 * a * Wd * (-1/a) * f * (1-f)
-               = 4 * Wd * f * (1-f)
+        W_surf(r) = -Wd * g(r, Rwd, awd)
 
-        But for ABSORPTION, we need negative imaginary potential,
-        so we return: -4 * Wd * f * (1-f)
+        where g = 4*f*(1-f) is the surface form factor.
         """
         r = np.atleast_1d(r)
-        f = woods_saxon_form_factor(r, self.Rwd, self.awd)
-        # Derivative form factor: g(r) = 4*f*(1-f) peaks at surface
-        # For absorption: W_surf = -Wd * g(r)
-        return -4.0 * self.Wd * f * (1 - f)
+        return -self.Wd * surface_form_factor(r, self.Rwd, self.awd)
 
     def real_potential(self, r):
         """
@@ -401,16 +442,60 @@ class KD02Potential:
 
     def spin_orbit_real(self, r):
         """
-        Real spin-orbit potential form factor.
+        Real spin-orbit radial form (without l·s factor).
 
-        To get full SO potential, multiply by (l·s) / r * df/dr
-        Here we return Vso * f(r) for simplicity.
+        V_so(r) = 2 * λ²π * Vso * (1/r) * df/dr(r, Rvso, avso)
+
+        The factor of 2 comes from the KD02/FRESCO convention: the potential
+        is defined with l·σ operator, but we apply <l·s> externally.
+        Since l·σ = 2*l·s for spin-1/2, the factor of 2 appears here.
+
+        Returns V_so(r) in MeV. Multiply by <l·s> to get full SO potential.
         """
-        return self.Vso * woods_saxon_form_factor(r, self.Rvso, self.avso)
+        r = np.atleast_1d(r)
+        dfdr = woods_saxon_derivative(r, self.Rvso, self.avso)
+        r_safe = np.where(r > 1e-6, r, 1e-6)
+        return 2.0 * LAMBDA_PI_SQ * self.Vso * dfdr / r_safe
 
     def spin_orbit_imag(self, r):
-        """Imaginary spin-orbit potential form factor."""
-        return self.Wso * woods_saxon_form_factor(r, self.Rwso, self.awso)
+        """
+        Imaginary spin-orbit radial form (without l·s factor).
+
+        W_so(r) = 2 * λ²π * Wso * (1/r) * df/dr(r, Rwso, awso)
+
+        Returns W_so(r) in MeV. Multiply by <l·s> to get full SO potential.
+        """
+        r = np.atleast_1d(r)
+        dfdr = woods_saxon_derivative(r, self.Rwso, self.awso)
+        r_safe = np.where(r > 1e-6, r, 1e-6)
+        return 2.0 * LAMBDA_PI_SQ * self.Wso * dfdr / r_safe
+
+    def spin_orbit(self, r):
+        """
+        Complex spin-orbit radial form (without l·s factor).
+
+        U_so(r) = V_so(r) + i*W_so(r)
+        """
+        return self.spin_orbit_real(r) + 1j * self.spin_orbit_imag(r)
+
+    @staticmethod
+    def ls_factor(l, j):
+        """
+        Expectation value of l·s for given (l, j).
+
+        For spin-1/2 particles:
+            <l·s> = [j(j+1) - l(l+1) - 3/4] / 2
+                  = l/2        if j = l + 1/2
+                  = -(l+1)/2   if j = l - 1/2
+
+        Parameters:
+            l: orbital angular momentum (integer)
+            j: total angular momentum (half-integer, as float)
+
+        Returns:
+            <l·s>: expectation value
+        """
+        return 0.5 * (j * (j + 1) - l * (l + 1) - 0.75)
 
     def potential(self, r):
         """
@@ -419,6 +504,27 @@ class KD02Potential:
         U(r) = V_R(r) + i*W(r)
         """
         return self.real_potential(r) + 1j * self.imaginary_potential(r)
+
+    def full_potential(self, r, l, j):
+        """
+        Complete optical potential for a specific partial wave (l, j).
+
+        U(r, l, j) = V_central(r) + i*W_central(r) + [V_so(r) + i*W_so(r)] * <l·s>
+
+        Parameters:
+            r: radial coordinate (fm)
+            l: orbital angular momentum
+            j: total angular momentum (half-integer, e.g. 0.5, 1.5, ...)
+
+        Returns:
+            U(r): complex potential in MeV including spin-orbit
+        """
+        U_central = self.potential(r)
+        if l == 0:
+            return U_central
+        ls = self.ls_factor(l, j)
+        U_so = self.spin_orbit(r) * ls
+        return U_central + U_so
 
     def get_parameters(self):
         """Return all potential parameters as a dictionary."""
