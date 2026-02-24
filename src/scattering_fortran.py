@@ -313,6 +313,77 @@ class ScatteringSolverFortran:
             'r_mesh': self.r_mesh,
         }
 
+    def solve_spin_half(self, potential_lj, E, mu, Z1=0, Z2=0, l_max=None):
+        """
+        Solve scattering for spin-1/2 projectile on spin-0 target.
+
+        For each partial wave l, solves two channels j = l +/- 1/2
+        (only j = 1/2 for l = 0). Spin-orbit coupling makes S_{l+} != S_{l-}.
+
+        Parameters:
+            potential_lj: function V(r_array, l, j) returning complex potential
+                          array on the solver's r_mesh. Must include central,
+                          Coulomb, and spin-orbit contributions for given (l, j).
+            E: center-of-mass energy (MeV)
+            mu: reduced mass (amu)
+            Z1, Z2: charges of projectile and target
+            l_max: maximum angular momentum (default: self.l_max)
+
+        Returns:
+            dict with keys:
+                'k': wave number (fm^-1)
+                'eta': Sommerfeld parameter
+                'sigma': Coulomb phase shifts array
+                'S_matrix_lj': dict {(l, j): S_lj} of S-matrix elements
+        """
+        if l_max is None:
+            l_max = self.l_max
+
+        mu_mev = mu * AMU
+        k = np.sqrt(2.0 * mu_mev * E) / HBARC
+
+        if Z1 != 0 and Z2 != 0:
+            eta = Z1 * Z2 * E2 * mu_mev / (HBARC**2 * k)
+        else:
+            eta = 0.0
+
+        # Coulomb functions at matching point (depend on l only, not j)
+        rho_match = (self.irmatch - 2) * self.hcm * k
+        nfc, ngc, nfcp, ngcp = coul90_functions(rho_match, eta, l_max)
+        sigma = coulomb_phase_shift(eta, l_max) if abs(eta) > 1e-10 else np.zeros(l_max + 1)
+
+        # Build r grid with r=0 replaced to avoid singularity
+        r_grid = self.r_mesh.copy()
+        r_grid[0] = 1e-6
+
+        S_matrix_lj = {}
+
+        for l in range(l_max + 1):
+            j_values = [l + 0.5] if l == 0 else [l + 0.5, l - 0.5]
+
+            for j in j_values:
+                # Compute potential array for this (l, j)
+                Vpot = np.asarray(potential_lj(r_grid, l, j), dtype=complex).ravel()
+
+                # Solve radial Schrodinger equation via Numerov
+                rwfl = numerov_sch(self.hcm, self.irmatch, l, mu_mev, E, Vpot)
+
+                # Extract S-matrix via matching
+                wfmatch = rwfl[self.irmatch - 4 : self.irmatch + 1]
+                sl, nl = matching(
+                    l, k, wfmatch, self.hcm,
+                    nfc[l], ngc[l], nfcp[l], ngcp[l]
+                )
+
+                S_matrix_lj[(l, j)] = sl
+
+        return {
+            'k': k,
+            'eta': eta,
+            'sigma': sigma,
+            'S_matrix_lj': S_matrix_lj,
+        }
+
 
 #==============================================================================
 # Test
