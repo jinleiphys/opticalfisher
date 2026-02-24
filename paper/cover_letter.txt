@@ -1,0 +1,29 @@
+Subject: Submission of Letter "Scale-Invariant Information Limit in Nuclear Optical Potential Extraction"
+
+Dear Editors,
+
+I am submitting the enclosed manuscript for consideration as a Letter in Physical Review Letters.
+
+The "Igo ambiguity" in nuclear optical potentials has been a known qualitative hurdle for decades. However, fundamental questions remain: Is this ambiguity due to insufficient data precision, or is it an intrinsic physical limit? And exactly how many parameters can be constrained? This work provides the first definitive, quantitative answers, establishing that the ambiguity is a scale-invariant physical law, akin to the diffraction limit in optics.
+
+Addressing the PRL Criteria:
+
+(iii) Solving a Critical Outstanding Problem:
+Using Fisher information geometry powered by a novel differentiable programming approach, I demonstrate that single-energy elastic scattering constrains only D_eff = 1.7 +/- 0.4 parameter combinations out of 9 in the standard Koning-Delaroche potential. Unlike previous finite-difference studies which suffered from numerical noise, the machine-precision gradients employed here reveal an eigenvalue hierarchy spanning 9 orders of magnitude. This explains the strong correlations observed in recent Bayesian analyses [King et al., PRL 122, 232502 (2019)] and proves they are intrinsic to the scattering mechanism itself.
+
+(i) Substantially Advancing the Field:
+I establish the scale-invariance of this information limit: improving experimental precision shrinks error bars but cannot resolve the underlying parameter degeneracy. This finding transforms the Igo ambiguity from an empirical observation into a rigorous information bound. It proves that the community's pursuit of ever-more-precise angular distributions is mathematically futile for resolving this degeneracy.
+
+(iv) General Interest:
+This result dictates a strategic shift for future experiments at major facilities like FRIB and HIAF. Since the "sloppy" parameter directions are effectively invisible to elastic scattering regardless of precision, beam time is better spent measuring reaction cross-sections (sigma_R) which provide orthogonal constraints. This provides crucial "guardrails" for the interpretation of nuclear data and the derivation of forces from chiral EFT.
+
+Why this paper is timely:
+As nuclear physics enters the precision era with Bayesian Uncertainty Quantification becoming standard, distinguishing between reducible statistical errors and irreducible physical limits is urgent. This work draws that line clearly.
+
+Thank you for your consideration.
+
+Sincerely,
+
+Jin Lei
+School of Physics Science and Engineering
+Tongji University

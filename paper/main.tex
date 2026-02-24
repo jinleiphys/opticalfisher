@@ -1,0 +1,148 @@
+\documentclass[aps,prl,reprint,superscriptaddress,showpacs]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage[colorlinks=true, breaklinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+
+\begin{document}
+
+\title{Scale-Invariant Information Limit in Nuclear Optical Potential Extraction}
+
+\author{Jin Lei}
+\email{jinl@tongji.edu.cn}
+\affiliation{School of Physics Science and Engineering, Tongji University, Shanghai 200092, China}
+
+\date{\today}
+
+\begin{abstract}
+A fundamental question in nuclear physics is why the optical model potential remains ambiguous despite decades of precise scattering measurements. I show that this ``Igo ambiguity'' reflects a physical information limit, not insufficient data. By analyzing how sensitively elastic cross sections respond to each potential parameter, I find that only $D_\mathrm{eff} \approx 1.7 \pm 0.4$ independent parameter combinations (out of 9 in the Koning-Delaroche potential) can be constrained by single-energy elastic scattering. The constraints involve only the real volume parameters $V$ and $r_v$, the ``scattering volume''; the remaining 7 directions are effectively invisible. Crucially, this limit is \emph{scale-invariant}: better experiments reduce error bars but cannot resolve the underlying parameter degeneracy, just as shorter-wavelength light improves resolution but cannot beat the diffraction limit for a given aperture. Verified across 12 nuclei, 7 energies, and both projectile types, these results provide the first quantitative characterization of the Igo ambiguity and prove that it cannot be resolved by improved experimental precision.
+\end{abstract}
+
+\pacs{24.10.Ht, 25.40.Cm, 02.50.Tt}
+
+\maketitle
+
+%=====================================================
+% INTRODUCTION
+%=====================================================
+\textit{Introduction.}---The extraction of fundamental interactions from scattering observables represents one of the quintessential inverse problems in quantum physics. Since the inception of the optical model potential (OMP) over seventy years ago~\cite{Feshbach1954,Feshbach1958,Feshbach1962}, this effective description has served as the cornerstone for nuclear reaction theory. Yet, despite the exponential growth in experimental precision and computational power, a fundamental puzzle persists: the ``inverse problem ill-posedness,'' historically known as the Igo ambiguity~\cite{Igo1958}. Distinct parameter sets, representing vastly different nuclear potentials, can yield indistinguishable scattering cross sections, creating a continuous degeneracy that defies unique determination.
+
+Two types of ambiguity exist~\cite{Satchler1983}: \emph{discrete} ambiguity from different wavefunction node numbers (resolvable by high-energy rainbow scattering), and \emph{continuous} ambiguity where parameters trade off while maintaining the surface potential value. The qualitative origin of this continuous ambiguity is well understood: elastic scattering is primarily sensitive to the potential near the nuclear surface, making it insensitive to the detailed radial shape~\cite{Satchler1983}. However, three key questions remain unanswered: (1)~\emph{How many} independent parameter combinations can actually be constrained? (2)~Can improved experimental precision eventually resolve the degeneracy? (3)~Is the ambiguity universal across the nuclear chart?
+
+Recent Bayesian uncertainty quantification has documented large parameter uncertainties and revealed that only the potential depth $V$ and radius $r_v$ are strongly correlated~\cite{Lovell2021,King2019PRL,Catacora2019}, while PCA studies have identified parameter correlations~\cite{Catacora2021}. Yet these empirical observations lack a rigorous theoretical foundation that would answer the questions above.
+
+In this Letter, I provide the first quantitative characterization of the Igo ambiguity using Fisher information geometry. I show that elastic scattering compresses the 9-dimensional parameter space into a drastically lower-dimensional subspace, with only $\sim$2 ``stiff'' parameter combinations constrainable while the remaining directions remain ``sloppy.''
+
+Using Fisher information geometry, I prove that single-energy elastic scattering universally constrains only
+\begin{equation}
+D_\mathrm{eff} \approx 1.7 \pm 0.4
+\end{equation}
+independent parameter combinations out of 9 in the Koning-Delaroche potential~\cite{Koning2003}. This result holds regardless of target nucleus ($A = 12$--$208$) or beam energy ($E = 10$--$200$~MeV). Crucially, this limit is \emph{scale-invariant}: improving experimental precision reduces error bars but cannot alter the ``flat'' topology of the parameter manifold. Just as increasing the pixel count cannot resolve features below the diffraction limit, reducing experimental errors cannot resolve parameter degeneracy beyond this information bound.
+
+To distinguish this physical limit from numerical artifacts, I employ a differentiable bidirectional liquid neural network~\cite{lei2025bidirectionalneuralnetworksglobal}. Unlike traditional finite-difference methods which suffer from truncation and round-off errors, this neural solver enables automatic differentiation to compute gradients at machine precision. This ``mathematical microscope'' probes the Fisher information eigenvalue spectrum spanning 7--9 orders of magnitude, confirming that the information limit is robust and intrinsic.
+
+%=====================================================
+% METHOD
+%=====================================================
+\textit{Method.}---Consider nucleon-nucleus elastic scattering with the Koning-Delaroche (KD02) optical potential~\cite{Koning2003}, which has 9 parameters for the spin-independent terms: real volume $(V, r_v, a_v)$, imaginary volume $(W, r_w, a_w)$, and imaginary surface $(W_d, r_d, a_d)$. The spin-orbit coupling is omitted in this analysis; its inclusion would add parameters but not alter the fundamental conclusion that elastic scattering constrains only a low-dimensional subspace.
+
+The question is: how much can elastic cross section data $\sigma(\theta)$ tell us about these 9 parameters? To answer this, I compute the \emph{relative sensitivity} of the cross section to each parameter:
+\begin{equation}
+S_i(\theta) = \frac{\partial \log \sigma(\theta)}{\partial \log p_i} = \frac{p_i}{\sigma} \frac{\partial \sigma}{\partial p_i}.
+\end{equation}
+Using logarithmic derivatives makes parameters with different physical units (e.g., $V \sim 50$~MeV vs $r_v \sim 1.2$~fm) directly comparable. If $S_V$ and $S_{r_v}$ point in nearly the same direction in function space, then a fractional increase in $V$ has nearly the same effect as a fractional increase in $r_v$, and the two cannot be independently determined.
+
+This is formalized through the Fisher information matrix (FIM):
+\begin{equation}
+F_{ij} = \sum_\theta S_i(\theta) S_j(\theta),
+\end{equation}
+where the sum runs over angular bins. The FIM encodes how sensitively the cross section responds to fractional parameter changes. Diagonalizing the FIM yields eigenvalues $\{\lambda_i\}$ and corresponding eigenvectors $\{\mathbf{e}_i\}$. Each eigenvalue measures the information content along its eigenvector direction, with the fractional information $\lambda_i/\sum_j \lambda_j$. Each eigenvector $\mathbf{e}_i = (e_{i,1}, \ldots, e_{i,9})$ defines a linear combination of parameters; the squared component $e_{i,k}^2$ gives the fractional contribution of parameter $k$ to that mode. Large eigenvalues indicate ``stiff'' directions (well-constrained), while small eigenvalues indicate ``sloppy'' directions (poorly constrained).
+
+The effective dimensionality counts how many stiff directions exist:
+\begin{equation}
+D_\mathrm{eff} = \frac{(\sum_i \lambda_i)^2}{\sum_i \lambda_i^2}.
+\end{equation}
+This equals 9 if all directions are equally stiff, and approaches 1 if one direction dominates. Physically, $D_\mathrm{eff}$ answers: ``How many independent parameter combinations can the data actually constrain?''
+
+Geometrically, the FIM represents the local curvature of the $\chi^2$ landscape: large eigenvalues correspond to ``stiff'' directions (well-constrained), small eigenvalues to ``sloppy'' directions (the Igo ambiguity). Finding $D_\mathrm{eff} \approx 2$ means the 9-dimensional parameter space collapses into a 7-dimensional degenerate manifold.
+
+Crucially, $D_\mathrm{eff}$ is \emph{scale-invariant}. Reducing experimental error $\epsilon$ scales all eigenvalues as $\lambda_i \propto 1/\epsilon^2$, which tightens all error bars proportionally. But the \emph{ratio} of eigenvalues, and hence $D_\mathrm{eff}$, is unchanged. Better precision shrinks the allowed parameter region but cannot change its shape from a narrow valley into a sphere.
+
+\textit{Why differentiable modeling?}---A critical challenge is distinguishing physical parameter degeneracy from numerical artifacts. Standard finite-difference methods compute sensitivities via $\partial\sigma/\partial p_i \approx [\sigma(p_i + \delta) - \sigma(p_i - \delta)]/(2\delta)$. This suffers from a catastrophic tradeoff: large $\delta$ introduces truncation errors, while small $\delta$ amplifies floating-point round-off noise~\cite{Baydin2018}. In the FIM, where sensitivities are squared, this noise can artificially inflate the smallest eigenvalues, leading to \emph{overestimation} of $D_\mathrm{eff}$ and obscuring the true information limit.
+
+I circumvent this entirely using a bidirectional liquid neural network~\cite{lei2025bidirectionalneuralnetworksglobal} to solve the Schr\"odinger equation. A key innovation is reinterpreting liquid networks from temporal to \emph{spatial} dynamics: the time variable becomes the radial coordinate $r$, with a learnable ``relaxation length'' $\lambda$ replacing the time constant. The bidirectional structure naturally satisfies the boundary value problem (regularity at $r=0$ and scattering asymptotics at $r\to\infty$). Crucially, the network serves not as a ``black box'' predictor, but as a \emph{differentiable wavefunction ansatz} $\psi(r; \mathbf{p}) = \mathcal{N}(r, \mathbf{p})$, trained to minimize the Schr\"odinger equation residue and effectively becoming a semi-analytical solution. By encoding the wavefunction into a differentiable computational graph, automatic differentiation (AD)~\cite{Baydin2018} computes \emph{exact} gradients at machine precision ($\sim 10^{-15}$) via recursive application of the chain rule, yielding gradients devoid of finite-difference noise. This ``mathematical microscope'' resolves eigenvalue hierarchies spanning 7--9 orders of magnitude, confirming that the information limit is physically robust. The network is trained on scattering across $E = 1$--$200$~MeV and $A = 12$--$208$. Independent validation using Numerov with finite differences confirms consistency, but only AD can reliably resolve the smallest eigenvalues that define the ``flat'' directions of parameter space.
+
+%=====================================================
+% RESULTS
+%=====================================================
+\textit{Results.}---I systematically analyze 168 configurations: 12 nuclei ($^{12}$C to $^{208}$Pb), 7 energies (10--200~MeV), and both neutron and proton projectiles. Figure~\ref{fig:deff_universal} displays $D_\mathrm{eff}$ as a heatmap across all configurations. The remarkable uniformity ($D_\mathrm{eff} \approx 1$--$3$ everywhere) demonstrates that the information limit is universal: it depends neither on target mass nor beam energy nor projectile type. The statistics yield $D_\mathrm{eff} = 1.67 \pm 0.41$ (neutrons) and $1.62 \pm 0.44$ (protons).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig1_deff_universal.pdf}
+\caption{Universal information limit. Effective dimensionality $D_\mathrm{eff}$ across 12 nuclei and 7 energies for neutron (green) and proton (pink) projectiles. Values cluster around 1--3 regardless of system, demonstrating that the information limit is intrinsic to elastic scattering.}
+\label{fig:deff_universal}
+\end{figure}
+
+Figure~\ref{fig:deff_combined} confirms this universality through systematic analysis. Panel~(a) shows no significant mass dependence from $^{12}$C to $^{208}$Pb at $E = 50$~MeV. Panel~(b) shows $D_\mathrm{eff}$ remains bounded between 1 and 3 across all energies for $n+^{40}$Ca. Panel~(c) reveals condition numbers (ratio of largest to smallest FIM eigenvalue) exceeding $10^7$, indicating an extreme hierarchy between constrained and unconstrained directions. This means the stiffest direction is ten million times more constrained than the sloppiest: constraining ``stiff'' parameters to 1\% precision requires standard experimental errors, but constraining ``sloppy'' parameters to the same level would require reducing errors by a factor of $\sqrt{10^7} \approx 3000$. For all practical purposes, the 7 ``sloppy'' dimensions are unobservable.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig2_deff_combined.pdf}
+\caption{Systematic analysis for $n+A$ scattering. (a)~$D_\mathrm{eff}$ versus mass at $E = 50$~MeV shows no $A$-dependence. (b)~$D_\mathrm{eff}$ versus energy for $n+^{40}$Ca stays bounded. (c)~Condition number exceeds $10^7$, indicating extreme hierarchy between constrained and unconstrained directions.}
+\label{fig:deff_combined}
+\end{figure*}
+
+\textit{Anatomy of the information limit.}---What physics do these $\sim$2 constrained directions represent? Figure~\ref{fig:eigenvectors} shows the eigenvector composition for $n+^{40}$Ca at 50~MeV. The dominant eigenvector $\mathbf{e}_1$ (62\% of information) is composed primarily of the potential depth $V$ (87\%) with a smaller contribution from the radius $r_v$ (12\%). I call this the ``potential scale'' mode: it measures how deep the attractive potential well is. The second eigenvector $\mathbf{e}_2$ (31\% of information) is dominated by $r_v$ (81\%), with a smaller contribution from $V$ (10\%). I call this the ``volume radius'' mode: it measures the spatial extent of the potential.
+
+Together, these two modes capture 93\% of all information. This connects directly to the classical understanding: elastic scattering constrains ``volume integrals'' of the form $J_V = \int V(r) d^3r \propto V r_v^3$, which depend on both depth and radius. The eigenvector structure reveals that the data constrain two independent combinations of $V$ and $r_v$, not the full two-dimensional $(V, r_v)$ plane, but two specific linear combinations that correspond approximately to the volume integral and its radial moment. The remaining 7 parameter directions (diffuseness, volume absorption, and surface absorption) contribute only 7\% combined. These parameters are effectively ``invisible'' to elastic scattering. Notably, the imaginary potential parameters contribute negligibly to the leading eigenvectors, confirming that elastic angular distributions alone cannot constrain nuclear absorption; reaction cross-section measurements are essential.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig3_eigenvectors.pdf}
+\caption{Eigenvector composition for $n+^{40}$Ca at 50~MeV. The ``potential scale'' mode $\mathbf{e}_1$ (blue) is dominated by $V$ (87\%); the ``volume radius'' mode $\mathbf{e}_2$ (rose) is dominated by $r_v$ (81\%). Together they capture 93\% of the information.}
+\label{fig:eigenvectors}
+\end{figure}
+
+Why do $V$ and $r_v$ appear in both eigenvectors? This reflects the Igo ambiguity~\cite{Igo1958}: a deeper, narrower potential produces similar scattering as a shallower, wider one. Figure~\ref{fig:info_geometry} explains this geometrically. Panel~(a) shows the distribution of $D_\mathrm{eff}$ across all 168 configurations, confirming that values rarely exceed 3. Panel~(b) reveals the origin of this degeneracy: the sensitivities $|\partial\sigma/\partial V|$ and $|\partial\sigma/\partial r_v|$ have nearly identical angular dependence, pointing in the same direction in function space. The correlation is not perfect; otherwise $D_\mathrm{eff}$ would equal 1.0. Backward angles ($140^\circ$--$170^\circ$, shaded) are most informative, where the sensitivities to $V$ and $r_v$ are least collinear.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig4_info_geometry.pdf}
+\caption{Information geometry for $n+^{40}$Ca at 50~MeV. (a)~Distribution of $D_\mathrm{eff}$ across all 168 configurations. (b)~Gradient sensitivity curves: $V$ and $r_v$ have nearly identical angular dependence, explaining their degeneracy. Backward angles (shaded) provide the most discriminating power.}
+\label{fig:info_geometry}
+\end{figure}
+
+This provides a clear physical picture: single-energy elastic scattering constrains primarily the real volume parameters $V$ and $r_v$, the ``scattering volume,'' while everything else (diffuseness, volume absorption, surface absorption) is effectively unmeasurable.
+
+%=====================================================
+% DISCUSSION
+%=====================================================
+\textit{Discussion.}---The physical interpretation is clear: elastic scattering at a single energy probes primarily an integrated ``scattering volume'' rather than the detailed radial shape of the potential.
+
+The scale-invariance has important implications. No matter how precisely cross sections are measured, the parameter space retains its ``flat valley'' topology. The valley walls become steeper (smaller error bars), but the valley floor, the degenerate manifold, remains flat. This is a geometric property of how elastic scattering encodes potential information, not a limitation of current experiments.
+
+What would increase $D_\mathrm{eff}$? The scale-invariance proves that improving angular distribution precision is \emph{futile} for resolving the degeneracy. Instead, qualitatively different observables are required. Reaction cross sections $\sigma_R$ directly constrain the imaginary potential through the optical theorem, providing information \emph{orthogonal} to elastic angular distributions. Polarization observables probe spin-orbit terms with independent parameter sensitivities. Multi-energy analysis accesses energy dependence; dispersive optical models~\cite{Dickhoff2019} exploit such correlations through dispersion relations. The practical implication is clear: future experiments seeking to constrain optical potentials should prioritize $\sigma_R$ measurements over ever-more-precise angular distributions.
+
+While previous studies utilized PCA to identify parameter correlations~\cite{Catacora2021}, their analyses were limited by the numerical precision of finite-difference gradients. The differentiable programming approach reveals that the ``sloppy'' dimensions are not merely ``hard to constrain'' but correspond to eigenvalues separated by 7--9 orders of magnitude [Fig.~\ref{fig:deff_combined}(c)], effectively rendering them physically unobservable. More fundamentally, I establish that this hierarchy is \emph{scale-invariant}: it persists regardless of experimental precision, elevating the finding from a practical limitation to a physical law.
+
+Two caveats deserve discussion. First, this analysis omits spin-orbit coupling. While its inclusion would add parameters, the spin-orbit term is primarily constrained by polarization observables (analyzing powers), not unpolarized cross sections. For the vast majority of available nuclear scattering data, namely unpolarized angular distributions, the limit derived here remains the fundamental constraint on the central potential. Second, the analysis uses the Woods-Saxon parameterization of the Koning-Delaroche potential. However, the information limit arises from physics, not parameterization: elastic scattering probes an integrated ``scattering volume'' rather than detailed radial shape, regardless of whether one uses Woods-Saxon, microscopic, or dispersive optical potentials. The specific value of $D_\mathrm{eff}$ may vary slightly with different parameterizations, but the qualitative conclusion, that only $\sim$2 directions are constrained, reflects the intrinsic surface sensitivity of quantum scattering.
+
+%=====================================================
+% CONCLUSION
+%=====================================================
+\textit{Conclusion.}---This work answers three longstanding questions about the Igo ambiguity. First, \emph{how many} parameters can be constrained? Elastic nucleon-nucleus scattering at a single energy constrains only $D_\mathrm{eff} \approx 1.7 \pm 0.4$ parameter combinations. Second, can better experiments resolve the degeneracy? No---the limit is \emph{scale-invariant}. Third, is this universal? Yes---the result holds across the nuclear chart. Eigenvector analysis reveals the physics: the two dominant constraints involve only the real volume parameters $V$ and $r_v$, the ``scattering volume.'' The remaining 7 parameter directions, including diffuseness, volume absorption, and surface absorption, are effectively invisible to elastic scattering.
+
+This information limit has broader consequences. Optical potentials encode the effective nucleon-nucleus interaction derived from underlying nuclear forces~\cite{Hebborn2023,Idini2019PRL}. Since Weinberg's foundational work~\cite{Weinberg1990}, chiral effective field theory has enabled systematic derivation of nuclear forces from QCD symmetries~\cite{Epelbaum2009,Epelbaum2015PRL}, with high-precision potentials now achieving $\chi^2/\text{datum} \approx 1$ for nucleon-nucleon scattering~\cite{Wiringa1995,Machleidt2001,Entem2003}. The ``sloppy'' parameter directions identified here imply that elastic scattering is fundamentally insensitive to certain aspects of this interaction, limiting what can be learned about nuclear forces from such measurements alone.
+
+Breaking this bound requires qualitatively different observables. The key insight is that improving angular distribution precision cannot resolve the degeneracy (scale-invariance), but adding even a single reaction cross section measurement provides orthogonal information that directly constrains the imaginary potential. This has immediate experimental implications: for rare-isotope beam facilities where beam time is precious, measuring $\sigma_R$ (achievable via transmission experiments at low intensity) may yield more constraining power than high-statistics angular distributions. The same framework could quantify parameter degeneracy in nucleon-nucleon potentials, where different parameterizations yield nearly identical phase shifts despite vastly different parameter values, suggesting that ``sloppiness'' may be a universal feature of effective nuclear interactions.
+
+%=====================================================
+\begin{acknowledgments}
+This work was supported by the National Natural Science Foundation of China (Grant Nos.~12475132 and 12535009) and the Fundamental Research Funds for the Central Universities.
+\end{acknowledgments}
+
+\bibliography{references}
+
+\end{document}
