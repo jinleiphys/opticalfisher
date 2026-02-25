@@ -41,8 +41,13 @@ def coulomb_amplitude(k, eta, theta_rad, sigma_0):
         return np.zeros_like(theta_rad, dtype=complex)
 
     sin_half_sq = np.sin(theta_rad / 2.0) ** 2
-    f_C = (-eta / (2.0 * k * sin_half_sq)
-           * np.exp(-1j * eta * np.log(sin_half_sq) + 2j * sigma_0))
+
+    # Guard against forward-angle singularity (theta -> 0)
+    safe = sin_half_sq > 1e-30
+    f_C = np.zeros_like(theta_rad, dtype=complex)
+    f_C[safe] = (-eta / (2.0 * k * sin_half_sq[safe])
+                 * np.exp(-1j * eta * np.log(sin_half_sq[safe]) + 2j * sigma_0))
+    # At theta=0 the Coulomb amplitude diverges; leave as 0 (physical: never measured at 0°)
     return f_C
 
 

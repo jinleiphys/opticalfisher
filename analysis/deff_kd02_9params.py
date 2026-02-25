@@ -26,7 +26,8 @@ Date: December 2024
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-sys.path.insert(0, '/Users/jinlei/Desktop/code/PINN_CFC')
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from potentials import woods_saxon_form_factor, coulomb_potential
 from scattering_fortran import ScatteringSolverFortran, HBARC, AMU, E2
@@ -67,7 +68,8 @@ def kd02_potential_9params(r, A, Z_proj, Z, params):
 
     # Add Coulomb for proton
     if Z_proj > 0:
-        Rc = 1.25 * A_third
+        rc_kd02 = 1.198 + 0.697 * A**(-2./3.) + 12.994 * A**(-5./3.)
+        Rc = rc_kd02 * A_third
         V_coul = coulomb_potential(r, Z_proj, Z, Rc)
         V_opt = V_opt + V_coul
 
@@ -342,7 +344,7 @@ def main():
         ax.annotate(f'{frac:.1f}%', (i+1, frac), ha='center', va='bottom', fontsize=9)
 
     plt.tight_layout()
-    outfile = '/Users/jinlei/Desktop/code/PINN_CFC/experiments/deff_kd02_9params.png'
+    outfile = os.path.join(os.path.dirname(__file__), '..', 'data', 'deff_kd02_9params.png')
     plt.savefig(outfile, dpi=150, bbox_inches='tight')
     print(f"\nSaved: {outfile}")
 

@@ -56,9 +56,10 @@ def kd02_potential_11params(r, l, j, A, Z_proj, Z, params, rvso, avso):
 
     U = -V * f_v - 1j * W * f_w - 1j * Wd * g_d
 
-    # Coulomb for protons
+    # Coulomb for protons (use KD02 radius formula)
     if Z_proj > 0:
-        Rc = 1.25 * A_third
+        rc_kd02 = 1.198 + 0.697 * A**(-2./3.) + 12.994 * A**(-5./3.)
+        Rc = rc_kd02 * A_third
         U = U + coulomb_potential(r, Z_proj, Z, Rc)
 
     # --- Spin-orbit ---
@@ -75,8 +76,19 @@ def kd02_potential_11params(r, l, j, A, Z_proj, Z, params, rvso, avso):
     return U
 
 
+def adaptive_lmax(A, E_lab, min_lmax=30):
+    """Determine l_max from grazing angular momentum: l_max = k*R + 15."""
+    A_proj = 1
+    mu = A_proj * A / (A_proj + A)
+    E_cm = E_lab * A / (A_proj + A)
+    k = np.sqrt(2 * mu * AMU * E_cm) / HBARC
+    R = 1.25 * A**(1./3.)
+    l_g = k * R
+    return max(min_lmax, int(l_g + 15))
+
+
 def compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,
-                                rvso, avso, l_max=30):
+                                rvso, avso, l_max=None):
     """
     Compute all observables for given parameters.
 
@@ -87,6 +99,9 @@ def compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,
     mu = A_proj * A / (A_proj + A)
     E_cm = E_lab * A / (A_proj + A)
     Z_proj = 1 if proj == 'p' else 0
+
+    if l_max is None:
+        l_max = adaptive_lmax(A, E_lab)
 
     def pot_lj(r, l, j):
         return kd02_potential_11params(r, l, j, A, Z_proj, Z, params,
@@ -154,7 +169,7 @@ def build_gradient_vector(obs_0, obs_plus, obs_minus, delta, param_val,
 
 
 def compute_fisher_extended(proj, A, Z, E_lab, theta_deg, params,
-                             rvso, avso, eps_rel=0.01, l_max=30,
+                             rvso, avso, eps_rel=0.01, l_max=None,
                              delta_Ay=0.03):
     """
     Compute Fisher matrix for 11 parameters with all observables.

@@ -23,12 +23,19 @@ from matplotlib.gridspec import GridSpec
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 sys.path.insert(0, os.path.dirname(__file__))
 
 from scattering_fortran import HBARC, AMU, E2
-from train_parametric_bicfc_moresamples import ParametricBidirectionalCfC
-from end_to_end_autodiff import DifferentiableForwardModel, DifferentiableFeatureBuilder
+try:
+    from train_parametric_bicfc_moresamples import ParametricBidirectionalCfC
+    from end_to_end_autodiff import DifferentiableForwardModel, DifferentiableFeatureBuilder
+except ImportError:
+    raise ImportError(
+        "This is a legacy neural network script requiring model files not in this repository.\n"
+        "It depends on 'train_parametric_bicfc_moresamples' and 'end_to_end_autodiff' from\n"
+        "the PINN_CFC project. Use the Numerov-based scripts (deff_scan_extended.py) instead."
+    )
 
 
 #==============================================================================
@@ -718,8 +725,8 @@ def systematic_deff_scan(model, model_config, base_params):
                         'A': nuc['A'], 'name': nuc['name'], 'E': E,
                         'projectile': proj, 'D_eff': D_eff, 'corr': corr
                     })
-                except:
-                    pass
+                except Exception as e:
+                    print(f"  Warning: {proj}+{nuc['name']} @ {E} MeV failed: {e}")
 
     # Summary
     all_deff = [r['D_eff'] for r in results['full_scan']]

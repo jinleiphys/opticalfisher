@@ -10,8 +10,6 @@ Date: December 2024
 """
 
 import numpy as np
-import torch
-import torch.nn as nn
 import sys
 import os
 import json
@@ -19,9 +17,17 @@ import time
 
 # Add paths
 sys.path.insert(0, os.path.dirname(__file__))
-sys.path.insert(0, '/Users/jinlei/Desktop/code/PINN_CFC')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from ncps.torch import CfC
+try:
+    import torch
+    import torch.nn as nn
+    from ncps.torch import CfC
+except ImportError:
+    raise ImportError(
+        "This is a legacy neural network script requiring torch and ncps.\n"
+        "Use the Numerov-based scripts (deff_scan_extended.py) instead."
+    )
 from ncps.wirings import AutoNCP
 
 # Physical constants
@@ -402,7 +408,7 @@ def run_deff_scan(model, device, log=print):
                         'projectile': proj,
                         'D_eff': float(D_eff),
                         'eigenvalues': eigenvalues.tolist(),
-                        'condition_number': float(eigenvalues.max() / (eigenvalues.min() + 1e-20)),
+                        'condition_number': float(eigenvalues.max() / (eigenvalues[eigenvalues > 1e-20].min() if np.any(eigenvalues > 1e-20) else 1e-20)),
                         'V_rv_correlation': float(V_rv_corr),
                         'params': params.tolist(),
                     }
@@ -445,7 +451,7 @@ def run_single_case(args):
             'projectile': proj,
             'D_eff': float(D_eff),
             'eigenvalues': eigenvalues.tolist(),
-            'condition_number': float(eigenvalues.max() / (eigenvalues.min() + 1e-20)),
+            'condition_number': float(eigenvalues.max() / (eigenvalues[eigenvalues > 1e-20].min() if np.any(eigenvalues > 1e-20) else 1e-20)),
             'V_rv_correlation': float(V_rv_corr),
             'params': params.tolist(),
         }
@@ -498,7 +504,7 @@ def run_on_gpu(gpu_id, cases, config, param_names, result_queue, model_path):
                 'projectile': proj,
                 'D_eff': float(D_eff),
                 'eigenvalues': eigenvalues.tolist(),
-                'condition_number': float(eigenvalues.max() / (eigenvalues.min() + 1e-20)),
+                'condition_number': float(eigenvalues.max() / (eigenvalues[eigenvalues > 1e-20].min() if np.any(eigenvalues > 1e-20) else 1e-20)),
                 'V_rv_correlation': float(V_rv_corr),
                 'params': params.tolist(),
             }
@@ -538,6 +544,11 @@ def main():
     # Load model
     script_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(script_dir, 'stage2_bicfc_moresamples.pt')
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(
+            f"Model file not found: {model_path}\n"
+            "This is a legacy NN script. Use deff_scan_extended.py (Numerov) instead."
+        )
     log(f"Loading model: {model_path}")
 
     checkpoint = torch.load(model_path, map_location=device, weights_only=False)

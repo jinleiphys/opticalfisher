@@ -18,7 +18,7 @@ import json
 import os
 import sys
 import time
-sys.path.insert(0, '/Users/jinlei/Desktop/code/PINN_CFC')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 import torch
 import torch.nn as nn
@@ -355,7 +355,13 @@ def main():
     print()
 
     # Load model
-    model_path = '/Users/jinlei/Desktop/code/PINN_CFC/PRC_Neural_Solver/stage2_bicfc_moresamples.pt'
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(base_dir, 'stage2_bicfc_moresamples.pt')
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(
+            f"Model file not found: {model_path}\n"
+            "This is a legacy NN script. Use deff_scan_extended.py (Numerov) instead."
+        )
     print(f"Loading model: {model_path}")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

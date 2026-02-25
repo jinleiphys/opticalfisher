@@ -68,6 +68,17 @@ The computational infrastructure now includes:
 
 \textbf{(ii) KD02 global systematics}: We compute the Jacobian $J = \partial\boldsymbol{\theta}_\mathrm{local}/\partial\boldsymbol{\theta}_\mathrm{global}$ relating the 11 local parameters per energy to the 17 global KD02 parameters, and project the multi-energy Fisher matrix onto the global space: $F_\mathrm{global} = J^T F_\mathrm{combined} J$. The result ($D_\mathrm{eff} \approx 1.0$ of 17 parameters) reveals that the polynomial functional forms in KD02 introduce additional degeneracies beyond those inherent in the scattering physics.
 
+\textbf{(iii) Full multi-system global analysis}: To address the concern that a systematic optical potential should be evaluated across \emph{all} systems rather than a single nucleus, we have extended the analysis to the \textbf{full universal KD02 coefficient space}. The KD02 global potential parametrizes all local potential parameters as functions of mass $A$, charge $Z$, and energy $E$ through $\sim$45 universal coefficients (e.g., $v_1 = 59.30 - 21.0(N-Z)/A - 0.024A$). We compute the Jacobian from these 45 universal parameters to the 11 local parameters for each of the 168 (nucleus, energy, projectile) configurations, and sum the transformed Fisher matrices:
+\begin{equation*}
+F_\mathrm{universal} = \sum_{i=1}^{168} J_i^T \, F_i^\mathrm{local} \, J_i.
+\end{equation*}
+
+The result is striking: $D_\mathrm{eff} = 2.0$ out of 45 universal parameters. The dominant eigenvector (69\% of total information) is the real potential radius coefficient $r_{v0}$, followed by the surface imaginary radius $r_{d0}$ (12\%). Adding nuclei saturates $D_\mathrm{eff}$ after $\sim$5 systems; the improvement from going from one nucleus to 24 (nucleus, projectile) pairs is only a factor of $\sim$1.2. This confirms that the information limit is not a single-system artifact but an intrinsic feature of how nucleon-nucleus scattering encodes potential information.
+
+We also performed the global analysis using only elastic scattering data (no $A_y$, $\sigma_R$, or $\sigma_T$), yielding $D_\mathrm{eff} = 2.5/45$---slightly \emph{higher} than the all-observable result. This counterintuitive result arises because $A_y$ data strongly reinforce the already-constrained ``stiff'' directions (individual eigenvalues increase by factors of 300--500), making the eigenvalue spectrum more peaked and thus lowering the participation ratio. The total Fisher information increases by orders of magnitude, but concentrates along already-stiff directions rather than opening new ones. In both cases, only $\sim$2 effective parameter combinations are constrained.
+
+The per-nucleus analysis in the universal space shows $D_\mathrm{eff} = 1.3$--$3.2$ (all 7 energies combined), with lighter nuclei like $^{12}$C having higher values. These results are presented in the revised End Matter with a new figure (Fig.~\ref{fig:global_fisher}) showing the D$_\mathrm{eff}$ saturation, eigenvalue spectrum, and eigenvector composition in the 45-dimensional universal coefficient space.
+
 \textbf{Diffuseness}: The referee's specific concern is validated by our analysis. At a single energy, diffuseness parameters ($a_v$, $a_w$, $a_d$) contribute $<1\%$ to the dominant eigenvectors (Fig.~3). With multi-energy data, the imaginary subgroup (which includes $a_w$ and $a_d$) becomes better constrained ($D_\mathrm{eff}^\mathrm{imag}: 1.1 \to 2.3$). This quantitatively confirms the referee's statement that diffuseness is primarily constrained through energy systematics.
 }
 
@@ -127,7 +138,7 @@ The two approaches are complementary: Fisher efficiently maps global constraint 
 \item Added observables: $A_y$, $\sigma_R$, $\sigma_T$ (in addition to $d\sigma/d\Omega$)
 \item New step-by-step constraint analysis decomposing the information contribution of each observable and multi-energy data (new Fig.~5)
 \item New angle-resolved sensitivity analysis showing $|S_i(\theta)|$ for all 11 parameters (new Fig.~6)
-\item KD02 global parameter analysis (17 parameters) via Jacobian projection
+\item KD02 global parameter analysis: per-nucleus (17 parameters) and full universal coefficient space (45 parameters, 168 systems combined) via Jacobian projection
 \item Detailed Fisher--Bayesian comparison in End Matter, connecting to King \textit{et al.} PRL (2019)
 \item Revised abstract, introduction, discussion, and conclusion
 \item All calculations use Numerov solver with finite-difference gradients (no neural network dependencies)

@@ -107,6 +107,11 @@ def numerov_sch(hcm, irmatch, l, mu, ecm, Vpot):
     # Starting point: r0 = 2*l (to avoid centrifugal singularity)
     r0 = 2 * l
 
+    # Boundary check: r0+2 must fit within the grid
+    if r0 + 2 >= irmatch:
+        # l is too large for this grid — wavefunction is negligible, return zeros
+        return rwfl
+
     # Boundary condition: u(r0) = 0
     rwfl[r0] = 0.0
 
@@ -291,6 +296,13 @@ class ScatteringSolverFortran:
             # Solve Schrödinger equation
             rwfl = numerov_sch(self.hcm, self.irmatch, l, mu_mev, E, Vpot)
 
+            # Boundary guard: need irmatch >= 5 for 5-point matching stencil
+            if self.irmatch < 5:
+                S_matrix[l] = 1.0 + 0j
+                phase_shifts[l] = 0.0
+                wave_functions[l] = rwfl
+                continue
+
             # Extract S-matrix using matching at irmatch-2
             # wfmatch = rwfl[irmatch-4:irmatch+1] (5 points centered at irmatch-2)
             wfmatch = rwfl[self.irmatch-4:self.irmatch+1]
@@ -364,9 +376,19 @@ class ScatteringSolverFortran:
             for j in j_values:
                 # Compute potential array for this (l, j)
                 Vpot = np.asarray(potential_lj(r_grid, l, j), dtype=complex).ravel()
+                if len(Vpot) != self.irmatch + 1:
+                    raise ValueError(
+                        f"potential_lj returned array of length {len(Vpot)}, "
+                        f"expected {self.irmatch + 1} (l={l}, j={j})"
+                    )
 
                 # Solve radial Schrodinger equation via Numerov
                 rwfl = numerov_sch(self.hcm, self.irmatch, l, mu_mev, E, Vpot)
+
+                # Boundary guard: need irmatch >= 5 for 5-point matching stencil
+                if self.irmatch < 5:
+                    S_matrix_lj[(l, j)] = 1.0 + 0j
+                    continue
 
                 # Extract S-matrix via matching
                 wfmatch = rwfl[self.irmatch - 4 : self.irmatch + 1]
