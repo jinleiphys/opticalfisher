@@ -35,7 +35,7 @@ The revised manuscript presents these extensions as a \textbf{step-by-step const
 
 \referee{The author focuses exclusively on elastic scattering angular distributions, whereas KD02 was constrained using (i) elastic-scattering angular distributions, (ii) analyzing powers, (iii) total cross sections, and (iv) average resonance parameters. If a comprehensive analysis of ALL data types still showed reduced effective parameter space, THAT would be a significant new insight.}
 
-\response{We have now extended the analysis to include all four observable types the referee lists. The revised manuscript presents a step-by-step decomposition (new Fig.~5):
+\response{We have now extended the analysis to include three of the four scattering-region observable types the referee lists: elastic angular distributions, analyzing powers $A_y$, and total cross sections $\sigma_T$ (plus the reaction cross section $\sigma_R$). The fourth type---average resonance parameters---constrains the potential at low energies ($E \lesssim 1$~MeV) in the resonance region, which lies outside the 10--200~MeV scope of the present analysis; moreover, KD02 itself is not designed to reproduce resonance-region observables accurately, as its smooth Woods-Saxon forms cannot capture the rapid energy dependence near individual resonances. Nevertheless, the Fisher framework generalizes straightforwardly to include resonance data: one simply adds their contribution to the Fisher matrix, $F_\mathrm{total} = F_\mathrm{scattering} + F_\mathrm{resonance}$. The revised manuscript presents a step-by-step decomposition (new Fig.~4):
 
 \begin{itemize}[noitemsep]
 \item \textbf{Step 1: Elastic $d\sigma/d\Omega$ alone}: $D_\mathrm{eff} \approx 1.2$ (50 MeV), with the 168-configuration average $D_\mathrm{eff} = 1.7 \pm 0.4$.
@@ -45,7 +45,7 @@ The revised manuscript presents these extensions as a \textbf{step-by-step const
 \item \textbf{Step 5: KD02 global parameterization (17 parameters)}: $D_\mathrm{eff} \approx 1.0$ of 17 global parameters. Importantly, this does \emph{not} mean that information is lost relative to Step~4---the data still determine the same local-parameter combinations at each energy. The lower $D_\mathrm{eff}$ arises because KD02 expresses each local parameter as a polynomial in energy (e.g., $V(E)$ via 4 coefficients), but the data can only pin down the leading 1--2 coefficients; the higher-order terms ($v_3$, $v_4$, $d_3$, etc.) are redundant. This is analogous to fitting a straight line with a cubic: the slope is well-determined, but the curvature coefficients are arbitrary. The KD02 functional form is over-parametrized.
 \end{itemize}
 
-The key new insight, as the referee anticipated, is precisely this: even after including ALL observable types, $D_\mathrm{eff}$ remains $\sim$2--2.5, far below the 11 local parameters. The information limit is intrinsic to the scattering physics. The step-by-step decomposition reveals \textit{which} observables contribute \textit{what}: $A_y$ lifts the spin-orbit degeneracy, multi-energy data lift the imaginary-parameter degeneracy, but single-energy $\sigma_R$ provides negligible additional constraint.
+The key new insight, as the referee anticipated, is precisely this: even after including all scattering-region observables available within 10--200~MeV ($d\sigma/d\Omega$, $A_y$, $\sigma_T$, and $\sigma_R$), $D_\mathrm{eff}$ remains $\sim$2--2.5, far below the 11 local parameters. The information limit is intrinsic to the scattering physics. The step-by-step decomposition reveals \textit{which} observables contribute \textit{what}: $A_y$ lifts the spin-orbit degeneracy, multi-energy data lift the imaginary-parameter degeneracy, but single-energy $\sigma_R$ provides negligible additional constraint.
 
 \textbf{Physical picture of the Igo ambiguity}: The eigenvector analysis (revised Fig.~3) provides a precise characterization of the classical Igo ambiguity. The dominant eigenvector $\mathbf{e}_1$ has $V$ and $r_v$ entering with the \emph{same sign}: both increasing together makes the volume integral $J_V \propto V r_v^3$ larger, producing a measurably different cross section. This is the ``stiff'' (well-constrained) direction. The Igo ambiguity is the \emph{orthogonal} ``sloppy'' direction, where $V$ increases while $r_v$ decreases (or vice versa) so that $J_V$ stays approximately constant---the data cannot distinguish a deep, narrow potential from a shallow, wide one. In short, there are two directions in the $V$-$r_v$ plane: the data pin down the volume integral (stiff), but cannot resolve the depth-radius tradeoff (sloppy). This eigenvalue ratio exceeds $10^5$, making the tradeoff direction effectively unmeasurable.
 
@@ -64,7 +64,7 @@ The computational infrastructure now includes:
 
 \response{We now directly address both points:
 
-\textbf{(i) Multi-energy combined Fisher analysis}: The combined Fisher matrix $F_\mathrm{combined} = \sum_E F(E)$ captures the information from measurements across 7 energies (10--200 MeV). Combining elastic data alone across energies raises $D_\mathrm{eff}$ from $\sim$1.2 to $\sim$2.1--2.3 (new Fig.~5, Step 4). The energy lever arm is the key: at low energies the real potential dominates, while at high energies absorption becomes stronger, probing orthogonal parameter combinations. The imaginary subgroup $D_\mathrm{eff}$ increases from $\sim$1.1 (single energy) to $\sim$2.3 (7 energies).
+\textbf{(i) Multi-energy combined Fisher analysis}: The combined Fisher matrix $F_\mathrm{combined} = \sum_E F(E)$ captures the information from measurements across 7 energies (10--200 MeV). Combining elastic data alone across energies raises $D_\mathrm{eff}$ from $\sim$1.2 to $\sim$2.1--2.3 (new Fig.~4, Step 4). The energy lever arm is the key: at low energies the real potential dominates, while at high energies absorption becomes stronger, probing orthogonal parameter combinations. The imaginary subgroup $D_\mathrm{eff}$ increases from $\sim$1.1 (single energy) to $\sim$2.3 (7 energies).
 
 \textbf{(ii) KD02 global systematics}: We compute the Jacobian $J = \partial\boldsymbol{\theta}_\mathrm{local}/\partial\boldsymbol{\theta}_\mathrm{global}$ relating the 11 local parameters per energy to the 17 global KD02 parameters, and project the multi-energy Fisher matrix onto the global space: $F_\mathrm{global} = J^T F_\mathrm{combined} J$. The result ($D_\mathrm{eff} \approx 1.0$ of 17 parameters) reveals that the polynomial functional forms in KD02 introduce additional degeneracies beyond those inherent in the scattering physics.
 
@@ -77,7 +77,7 @@ The result is striking: $D_\mathrm{eff} = 2.0$ out of 45 universal parameters. T
 
 We also performed the global analysis using only elastic scattering data (no $A_y$, $\sigma_R$, or $\sigma_T$), yielding $D_\mathrm{eff} = 2.5/45$---slightly \emph{higher} than the all-observable result. This counterintuitive result arises because $A_y$ data strongly reinforce the already-constrained ``stiff'' directions (individual eigenvalues increase by factors of 300--500), making the eigenvalue spectrum more peaked and thus lowering the participation ratio. The total Fisher information increases by orders of magnitude, but concentrates along already-stiff directions rather than opening new ones. In both cases, only $\sim$2 effective parameter combinations are constrained.
 
-The per-nucleus analysis in the universal space shows $D_\mathrm{eff} = 1.3$--$3.2$ (all 7 energies combined), with lighter nuclei like $^{12}$C having higher values. These results are presented in the revised End Matter with a new figure (Fig.~\ref{fig:global_fisher}) showing the D$_\mathrm{eff}$ saturation, eigenvalue spectrum, and eigenvector composition in the 45-dimensional universal coefficient space.
+The per-nucleus analysis in the universal space shows $D_\mathrm{eff} = 1.3$--$3.2$ (all 7 energies combined), with lighter nuclei like $^{12}$C having higher values. These results are presented in the revised End Matter with a new figure (Fig.~5) showing the D$_\mathrm{eff}$ saturation, eigenvalue spectrum, and eigenvector composition in the 45-dimensional universal coefficient space.
 
 \textbf{Diffuseness}: The referee's specific concern is validated by our analysis. At a single energy, diffuseness parameters ($a_v$, $a_w$, $a_d$) contribute $<1\%$ to the dominant eigenvectors (Fig.~3). With multi-energy data, the imaginary subgroup (which includes $a_w$ and $a_d$) becomes better constrained ($D_\mathrm{eff}^\mathrm{imag}: 1.1 \to 2.3$). This quantitatively confirms the referee's statement that diffuseness is primarily constrained through energy systematics.
 }
@@ -86,7 +86,7 @@ The per-nucleus analysis in the universal space shows $D_\mathrm{eff} = 1.3$--$3
 
 \referee{Specific suggestion: Plot angle-resolved sensitivity to diffuseness $S_a(\theta)$---backward angle effects may be washed out when summing over all angles.}
 
-\response{Done. The new Fig.~6 shows $|S_i(\theta)|$ for all 11 parameters. The referee's intuition is confirmed: diffuseness parameters $a_v$, $a_w$, and $a_d$ become most distinguishable at backward angles ($\theta > 130^\circ$), where their sensitivity curves diverge from the depth/radius parameters. The cumulative $D_\mathrm{eff}(\theta_\mathrm{max})$ shows that $\sim$90\% of the total constraining power is captured by $\theta \approx 140^\circ$. Backward-angle measurements are disproportionately valuable for breaking the parameter degeneracy---a practical recommendation for experimental design.}
+\response{Done. The new Fig.~7 shows $|S_i(\theta)|$ for all 11 parameters. The referee's intuition is confirmed: diffuseness parameters $a_v$, $a_w$, and $a_d$ become most distinguishable at backward angles ($\theta > 130^\circ$), where their sensitivity curves diverge from the depth/radius parameters. The cumulative $D_\mathrm{eff}(\theta_\mathrm{max})$ shows that $\sim$90\% of the total constraining power is captured by $\theta \approx 140^\circ$. Backward-angle measurements are disproportionately valuable for breaking the parameter degeneracy---a practical recommendation for experimental design. The Fisher analysis does not deny the physical importance of diffuseness parameters, but quantifies that their information content comes primarily from backward angles combined with multi-energy data---precisely the regime where the referee's insight applies.}
 
 %=====================================================
 \subsection*{(3) Path to PRL-level impact}
@@ -127,7 +127,7 @@ The two approaches are complementary: Fisher efficiently maps global constraint 
 
 \referee{The link between ``sloppy'' parameters and chiral nuclear forces needs refinement.}
 
-\response{Revised. The Conclusion now states: ``The `sloppy' parameter directions do not imply that these aspects of the potential are unconstrained by all data---rather, they are insensitive to single-energy scattering measurements.'' The multi-energy analysis (Fig.~5) demonstrates that combining data across energies probes orthogonal directions in parameter space, providing a constructive path forward.}
+\response{Revised. The Conclusion now states: ``The `sloppy' parameter directions do not imply that these aspects of the potential are unconstrained by all data---rather, they are insensitive to single-energy scattering measurements.'' The multi-energy analysis (Fig.~4) demonstrates that combining data across energies probes orthogonal directions in parameter space, providing a constructive path forward.}
 
 \bigskip
 \section*{Summary of Changes}
@@ -136,8 +136,8 @@ The two approaches are complementary: Fisher efficiently maps global constraint 
 \item Extended from 9-parameter central potential to 11-parameter model including spin-orbit coupling ($V_{so}$, $W_{so}$)
 \item Added spin-1/2 scattering solver with $(l,j)$-resolved $S$-matrix, validated against FRESCO
 \item Added observables: $A_y$, $\sigma_R$, $\sigma_T$ (in addition to $d\sigma/d\Omega$)
-\item New step-by-step constraint analysis decomposing the information contribution of each observable and multi-energy data (new Fig.~5)
-\item New angle-resolved sensitivity analysis showing $|S_i(\theta)|$ for all 11 parameters (new Fig.~6)
+\item New step-by-step constraint analysis decomposing the information contribution of each observable and multi-energy data (new Fig.~4)
+\item New angle-resolved sensitivity analysis showing $|S_i(\theta)|$ for all 11 parameters (new Fig.~7)
 \item KD02 global parameter analysis: per-nucleus (17 parameters) and full universal coefficient space (45 parameters, 168 systems combined) via Jacobian projection
 \item Detailed Fisher--Bayesian comparison in End Matter, connecting to King \textit{et al.} PRL (2019)
 \item Revised abstract, introduction, discussion, and conclusion
