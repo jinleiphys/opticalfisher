@@ -48,10 +48,10 @@ PARAM_STYLES = {
 }
 
 PARAM_WIDTHS = {
-    'V': 3.0,  'rv': 2.5,  'av': 2.0,
-    'W': 2.5,  'rw': 2.0,  'aw': 1.5,
-    'Wd': 2.5, 'rvd': 2.0, 'avd': 1.5,
-    'Vso': 2.0, 'Wso': 1.5,
+    'V': 1.5,  'rv': 1.2,  'av': 1.0,
+    'W': 1.2,  'rw': 1.0,  'aw': 0.8,
+    'Wd': 1.2, 'rvd': 1.0, 'avd': 0.8,
+    'Vso': 1.0, 'Wso': 0.8,
 }
 
 PARAM_LABELS = {
@@ -65,13 +65,13 @@ PARAM_LABELS = {
 def setup_style():
     plt.rcParams.update({
         'font.family': 'serif',
-        'font.size': 18,
-        'axes.linewidth': 1.5,
-        'axes.labelsize': 20,
-        'axes.titlesize': 20,
-        'xtick.labelsize': 16,
-        'ytick.labelsize': 16,
-        'legend.fontsize': 12,
+        'font.size': 8,
+        'axes.linewidth': 0.8,
+        'axes.labelsize': 9,
+        'axes.titlesize': 9,
+        'xtick.labelsize': 8,
+        'ytick.labelsize': 8,
+        'legend.fontsize': 7,
         'figure.dpi': 150,
         'savefig.dpi': 300,
         'savefig.bbox': 'tight',
@@ -85,7 +85,7 @@ def plot_fig_sensitivity(data, save_path, case_idx=0):
     (b) Cumulative D_eff(theta_max)
     """
     setup_style()
-    fig, axes = plt.subplots(2, 1, figsize=(10, 12))
+    fig, axes = plt.subplots(2, 1, figsize=(3.4, 5.5))
 
     case = data['cases'][case_idx]
     theta = np.array(data['theta_deg'])
@@ -98,79 +98,73 @@ def plot_fig_sensitivity(data, save_path, case_idx=0):
     nuc = case['nucleus']
     E = case['E']
 
-    # === Panel (a): S_i(theta) ===
+    # === Panel (a): Raw derivatives on log scale — Igo degeneracy ===
     ax1 = axes[0]
 
-    # Shade backward angle region
-    ax1.axvspan(130, 175, alpha=0.15, color=COLORS['mint'],
-                label='Backward angles')
+    # Convert log-sensitivities S_i to raw derivatives: dsigma/dp_i = S_i * sigma / p_i
+    sigma = np.array(case['elastic_dcs'])
+    params_val = np.array(case['params'])
 
-    for i, pname in enumerate(param_names):
-        ax1.plot(theta, np.abs(S_dcs[i]),
-                 color=PARAM_COLORS[pname],
-                 linestyle=PARAM_STYLES[pname],
-                 linewidth=PARAM_WIDTHS[pname],
-                 label=PARAM_LABELS[pname])
+    idx_V = param_names.index('V')
+    idx_rv = param_names.index('rv')
+    idx_Wd = param_names.index('Wd')
+
+    raw_V = np.abs(S_dcs[idx_V] * sigma / params_val[idx_V])
+    raw_rv = np.abs(S_dcs[idx_rv] * sigma / params_val[idx_rv])
+    raw_Wd = np.abs(S_dcs[idx_Wd] * sigma / params_val[idx_Wd])
+
+    # Plot raw derivatives on log scale
+    ax1.semilogy(theta, raw_V, '-', color='#198754', marker='o',
+                 linewidth=1.5, markersize=3, markevery=4,
+                 label=r'$|\partial\sigma/\partial V|$')
+    ax1.semilogy(theta, raw_rv, '--', color='#D63384', marker='s',
+                 linewidth=1.5, markersize=3, markevery=4,
+                 label=r'$|\partial\sigma/\partial r_v|$')
+    ax1.semilogy(theta, raw_Wd, ':', color='#6F42C1', marker='D',
+                 linewidth=1.5, markersize=3, markevery=4,
+                 label=r'$|\partial\sigma/\partial W_d|$')
 
     ax1.set_xlabel(r'Scattering Angle $\theta$ (deg)')
-    ax1.set_ylabel(r'$|S_i(\theta)| = |d\log\sigma / d\log p_i|$')
-    # Extract element name from nucleus string (e.g. '40Ca' -> 'Ca')
-    elem = nuc[len(str(case["A"])):]
-    ax1.set_title(f'(a) Parameter Sensitivity: '
-                  f'${proj}+{{}}^{{{case["A"]}}}${elem} '
-                  f'at {E} MeV', pad=10)
+    ax1.set_ylabel(r'$|\partial(d\sigma/d\Omega)/\partial p_i|$')
     ax1.set_xlim(5, 175)
-    ax1.set_yscale('log')
-    ax1.set_ylim(1e-3, None)
-    ax1.legend(ncol=3, loc='upper right', fontsize=11, framealpha=0.9)
+    ax1.legend(loc='upper right', fontsize=6.5, framealpha=0.9,
+               handlelength=2.0)
     ax1.grid(True, alpha=0.3)
+    ax1.text(0.05, 0.95, '(a)', transform=ax1.transAxes, fontsize=10,
+             fontweight='bold', va='top', ha='left')
 
     # === Panel (b): Cumulative D_eff ===
     ax2 = axes[1]
 
     ax2.plot(theta, D_eff_cumul, '-', color=COLORS['dark_purple'],
-             linewidth=3, label=r'$D_\mathrm{eff}(\theta_\mathrm{max})$')
+             linewidth=1.5, label=r'$D_\mathrm{eff}(\theta_\mathrm{max})$')
 
-    # Mark 90% level
+    # Mark final D_eff level
     D_final = D_eff_cumul[-1]
     ax2.axhline(D_final, color=COLORS['gray'], linestyle=':', linewidth=1.5,
                 alpha=0.7)
-    ax2.axhline(0.9 * D_final, color=COLORS['dark_pink'], linestyle='--',
-                linewidth=1.5, alpha=0.7, label=f'90% of final')
 
-    target90 = 0.9 * D_final
-    idx90 = np.searchsorted(D_eff_cumul, target90)
-    if idx90 < len(theta):
-        ax2.axvline(theta[idx90], color=COLORS['dark_pink'], linestyle='--',
-                    linewidth=1, alpha=0.5)
-        ax2.annotate(f'{theta[idx90]:.0f}°',
-                     xy=(theta[idx90], target90),
-                     xytext=(theta[idx90] + 10, target90 - 0.1),
-                     fontsize=14, color=COLORS['dark_pink'])
+    # Mark peak
+    idx_peak = np.argmax(D_eff_cumul)
+    ax2.annotate(f'peak: {D_eff_cumul[idx_peak]:.1f} at {theta[idx_peak]:.0f}°',
+                 xy=(theta[idx_peak], D_eff_cumul[idx_peak]),
+                 xytext=(theta[idx_peak] + 15, D_eff_cumul[idx_peak] - 0.05),
+                 fontsize=7, color=COLORS['dark_purple'],
+                 arrowprops=dict(arrowstyle='->', color=COLORS['dark_purple'],
+                                 lw=1.0))
 
     ax2.text(0.95, 0.15, f'$D_{{\\mathrm{{eff}}}}$ = {D_final:.2f}',
-             transform=ax2.transAxes, fontsize=18, ha='right',
+             transform=ax2.transAxes, fontsize=8, ha='right',
              bbox=dict(boxstyle='round,pad=0.3', facecolor=COLORS['lavender'],
                        alpha=0.9))
 
-    # Also plot cumulative info for a few key parameters
-    ax2_twin = ax2.twinx()
-    for i, pname in enumerate(['V', 'rv', 'av', 'Wd']):
-        idx = param_names.index(pname)
-        C_norm = C_i[idx] / (C_i[idx, -1] + 1e-30)
-        ax2_twin.plot(theta, C_norm, '--',
-                      color=PARAM_COLORS[pname], linewidth=1.5, alpha=0.6,
-                      label=f'{PARAM_LABELS[pname]} (norm.)')
-    ax2_twin.set_ylabel('Cumulative Info (normalized)', fontsize=16)
-    ax2_twin.set_ylim(0, 1.3)
-    ax2_twin.legend(loc='center right', fontsize=11, framealpha=0.8)
-
     ax2.set_xlabel(r'Maximum Angle $\theta_\mathrm{max}$ (deg)')
     ax2.set_ylabel(r'$D_\mathrm{eff}(\theta_\mathrm{max})$')
-    ax2.set_title('(b) Cumulative Information Content', pad=10)
     ax2.set_xlim(5, 175)
-    ax2.legend(loc='upper left', fontsize=14)
+    ax2.legend(loc='upper right', fontsize=7, framealpha=0.9)
     ax2.grid(True, alpha=0.3)
+    ax2.text(0.97, 0.55, '(b)', transform=ax2.transAxes, fontsize=10,
+             fontweight='bold', va='top', ha='right')
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
@@ -195,8 +189,8 @@ def main():
     with open(data_path, 'r') as f:
         data = json.load(f)
 
-    # Plot for first case (n+40Ca@50MeV)
-    save_path = os.path.join(base_dir, 'fig_sensitivity.png')
+    # Plot for n+40Ca@50MeV (case 0)
+    save_path = os.path.join(base_dir, 'fig_sensitivity_v2.png')
     plot_fig_sensitivity(data, save_path, case_idx=0)
 
     print("\nDone!")

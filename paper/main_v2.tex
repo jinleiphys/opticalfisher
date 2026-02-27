@@ -1,0 +1,214 @@
+\documentclass[aps,prl,reprint,superscriptaddress,showpacs]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage[colorlinks=true, breaklinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+
+\begin{document}
+
+\title{Scale-Invariant Information Limit in Nuclear Optical Potential Extraction}
+
+\author{Jin Lei}
+\email{jinl@tongji.edu.cn}
+\affiliation{School of Physics Science and Engineering, Tongji University, Shanghai 200092, China}
+
+\date{\today}
+
+\begin{abstract}
+How strongly can nucleon-nucleus scattering data constrain optical model potential parameters? I show that the continuous ``Igo ambiguity'' reflects a physical information limit, not insufficient data. Using Fisher information geometry with the 11-parameter Koning-Delaroche potential (including spin-orbit), I decompose the constraining power step by step: single-energy elastic scattering constrains only $D_\mathrm{eff} \approx 1.7 \pm 0.4$ parameter combinations out of 11, averaged over 168 configurations; at a given energy, adding the reaction cross section $\sigma_R$ provides negligible improvement for comparable fractional uncertainties (a single datum versus 17 angular bins), while the analyzing power $A_y$ lifts $D_\mathrm{eff}$ by $\sim$30\% through spin-orbit information; combining measurements across 7 energies provides the largest improvement, raising $D_\mathrm{eff}$ to $\sim$2.2. Crucially, this limit is \emph{scale-invariant}: under uniform error reduction, better experiments shrink error bars but cannot resolve the underlying parameter degeneracy, just as shorter-wavelength light improves resolution but cannot beat the diffraction limit for a given aperture. Verified across 12 nuclei ($A = 12$--$208$), 7 energies ($E = 10$--$200$~MeV), and both projectile types, these results provide the first quantitative characterization of the Igo ambiguity and establish a clear hierarchy of experimental measurements for constraining the optical potential.
+\end{abstract}
+
+\pacs{24.10.Ht, 25.40.Cm, 02.50.Tt}
+
+\maketitle
+
+%=====================================================
+% INTRODUCTION
+%=====================================================
+\textit{Introduction.}---The extraction of fundamental interactions from scattering observables represents one of the quintessential inverse problems in quantum physics. Since the inception of the optical model potential (OMP) over seventy years ago~\cite{Feshbach1954,Feshbach1958,Feshbach1962}, this effective description has served as the cornerstone for nuclear reaction theory. Yet, despite the exponential growth in experimental precision and computational power, a fundamental puzzle persists: the ``inverse problem ill-posedness,'' historically known as the Igo ambiguity~\cite{Igo1958}. Distinct parameter sets, representing vastly different nuclear potentials, can yield indistinguishable scattering cross sections, creating a continuous degeneracy that defies unique determination.
+
+Two types of ambiguity exist~\cite{Satchler1983}: \emph{discrete} ambiguity from different wavefunction node numbers (resolvable by high-energy rainbow scattering), and \emph{continuous} ambiguity where parameters trade off while maintaining the surface potential value. The qualitative origin of this continuous ambiguity is well understood: elastic scattering is primarily sensitive to the potential near the nuclear surface, making it insensitive to the detailed radial shape~\cite{Satchler1983}. However, three key questions remain unanswered: (1)~\emph{How many} independent parameter combinations can actually be constrained? (2)~Can improved experimental precision eventually resolve the degeneracy? (3)~Is the ambiguity universal across the nuclear chart?
+
+Recent Bayesian uncertainty quantification has documented large parameter uncertainties. In a landmark comparison, King \textit{et al.}~\cite{King2019PRL} showed that Bayesian MCMC posterior distributions for optical potential parameters are strongly non-Gaussian, with only the depth $V$ and radius $r_v$ strongly correlated---in striking contrast to the frequentist $\chi^2$ approach which produced spurious correlations among all parameters. Subsequent studies confirmed these findings~\cite{Lovell2021,Catacora2019}, while principal component analysis (PCA) identified the dominant variance directions~\cite{Catacora2021}. Yet these empirical observations, while valuable, require $\sim$100,000 MCMC samples per system and lack a rigorous theoretical framework that would answer the questions above.
+
+In this Letter, I provide the first quantitative characterization of the Igo ambiguity using Fisher information geometry, focusing on the continuous scattering regime ($E = 10$--$200$~MeV) where the optical model applies. By progressively adding observables and energies, I decompose the constraining power of nucleon-nucleus scattering data, revealing that elastic scattering compresses the 11-dimensional parameter space into a drastically lower-dimensional subspace, with only $\sim$2 ``stiff'' parameter combinations constrainable while the remaining directions remain ``sloppy.''
+
+%=====================================================
+% METHOD
+%=====================================================
+\textit{Method.}---Consider nucleon-nucleus elastic scattering with the Koning-Delaroche (KD02) optical potential~\cite{Koning2003}, which has 9 parameters for the central terms: real volume $(V, r_v, a_v)$, imaginary volume $(W, r_w, a_w)$, and imaginary surface $(W_d, r_d, a_d)$. Including spin-orbit coupling with Thomas form adds 2 parameters $(V_{so}, W_{so})$, yielding an 11-parameter model for spin-1/2 scattering.
+
+The \emph{relative sensitivity} of the cross section to each parameter is
+\begin{equation}
+S_i(\theta) = \frac{\partial \log \sigma(\theta)}{\partial \log p_i} = \frac{p_i}{\sigma} \frac{\partial \sigma}{\partial p_i}.
+\end{equation}
+Using logarithmic derivatives makes parameters with different physical units directly comparable. The Fisher information matrix (FIM) is
+\begin{equation}
+F_{ij} = \sum_\theta S_i(\theta) S_j(\theta),
+\end{equation}
+where the sum runs over angular bins assuming uniform relative uncertainties. More generally, for a data vector $\{y_k\}$ comprising $d\sigma/d\Omega$, $A_y$, $\sigma_R$, and $\sigma_T$, the FIM takes the standard form $F_{ij} = \sum_k \sigma_k^{-2}\,(\partial y_k/\partial p_i)(\partial y_k/\partial p_j)$. For positive-definite cross sections, relative uncertainties recover the log-derivative form; for $A_y$, absolute uncertainties are used ($\Delta A_y = 0.03$). Each observable type enters additively ($F = F_\mathrm{elastic} + F_{A_y} + \cdots$), enabling the step-by-step decomposition below.
+
+Diagonalizing the FIM yields eigenvalues $\{\lambda_i\}$ and eigenvectors $\{\mathbf{e}_i\}$. The effective dimensionality
+\begin{equation}
+D_\mathrm{eff} = \frac{(\sum_i \lambda_i)^2}{\sum_i \lambda_i^2}
+\end{equation}
+equals $N_p$ if all directions are equally stiff and approaches 1 if one direction dominates. Crucially, $D_\mathrm{eff}$ is \emph{scale-invariant}: reducing experimental error $\epsilon$ scales all eigenvalues as $\lambda_i \propto 1/\epsilon^2$, but the ratio of eigenvalues, and hence $D_\mathrm{eff}$, is unchanged. Better precision shrinks the allowed parameter region but cannot change its shape from a narrow valley into a sphere. The Schr\"odinger equation is solved using the Numerov algorithm, with finite-difference gradients validated against FRESCO~\cite{Thompson1988} (see End Matter for numerical details).
+
+%=====================================================
+% RESULTS
+%=====================================================
+\textit{Results.}---I systematically analyze 168 configurations: 12 nuclei ($^{12}$C to $^{208}$Pb), 7 energies (10--200~MeV), and both neutron and proton projectiles. Figure~\ref{fig:deff_universal} displays $D_\mathrm{eff}$ as a heatmap across all configurations. The remarkable uniformity ($D_\mathrm{eff} \approx 1$--$3$ everywhere) demonstrates that the information limit is universal: it depends neither on target mass nor beam energy nor projectile type. The statistics yield $D_\mathrm{eff} = 1.63 \pm 0.34$ (neutrons) and $1.73 \pm 0.52$ (protons).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig1_deff_universal.pdf}
+\caption{Universal information limit. Effective dimensionality $D_\mathrm{eff}$ across 12 nuclei and 7 energies for neutron (green) and proton (pink) projectiles. Values cluster around 1--3 regardless of system, demonstrating that the information limit is intrinsic to elastic scattering.}
+\label{fig:deff_universal}
+\end{figure}
+
+Figure~\ref{fig:deff_combined} provides the detailed systematic analysis. Panel~(a) confirms no significant mass dependence from $^{12}$C to $^{208}$Pb at $E = 50$~MeV. Panel~(b) shows $D_\mathrm{eff}$ remains bounded between 1 and 3 across all energies for $n+^{40}$Ca. Panel~(c) reveals condition numbers of $10^6$--$10^8$: the stiffest direction is $10^3$--$10^4$ times better constrained than the sloppiest, rendering the $\sim$9 sloppy dimensions effectively unobservable.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig2_deff_combined.pdf}
+\caption{Systematic analysis for $n+A$ scattering. (a)~$D_\mathrm{eff}$ versus mass at $E = 50$~MeV shows no $A$-dependence. (b)~$D_\mathrm{eff}$ versus energy for $n+^{40}$Ca stays bounded. (c)~Condition number ranges from $10^6$ to $10^8$, indicating extreme hierarchy between constrained and unconstrained directions.}
+\label{fig:deff_combined}
+\end{figure*}
+
+\textit{Anatomy of the information limit.}---Figure~\ref{fig:eigenvectors} shows the eigenvector composition for $n+^{40}$Ca at 50~MeV. The dominant mode $\mathbf{e}_1$ (92\% of information) is driven by $r_v$ (65\%) and $V$ (12\%) with the same sign, corresponding to the volume integral $J_V \propto V r_v^3$. The radius $r_v$ dominates because $\partial\log J_V/\partial\log r_v = 3$ versus $\partial\log J_V/\partial\log V = 1$. The Igo ambiguity~\cite{Igo1958} lives in the orthogonal sloppy direction where $V$ and $r_v$ trade off at constant $J_V$, with an eigenvalue $10^5$ times smaller. The second mode $\mathbf{e}_2$ (6\%) mixes $r_v$, $a_v$, and $r_d$, encoding the radial shape. Together, these two modes capture 98\% of all information; the remaining 9 directions---diffuseness, imaginary potential, and spin-orbit---are effectively invisible to elastic angular distributions.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig3_eigenvectors.pdf}
+\caption{Eigenvector composition for elastic $n+^{40}$Ca at 50~MeV (11 parameters). The ``potential radius'' mode $\mathbf{e}_1$ (green) is dominated by $r_v$ (65\%) with $r_d$ (15\%) and $V$ (12\%); the ``radial geometry'' mode $\mathbf{e}_2$ (rose) mixes $r_v$, $a_v$, and $r_d$. Together they capture 98\% of the information.}
+\label{fig:eigenvectors}
+\end{figure}
+
+The raw cross section derivatives $|\partial\sigma/\partial V|$ and $|\partial\sigma/\partial r_v|$ track each other over five orders of magnitude with nearly identical diffraction patterns (End Matter, Fig.~\ref{fig:sensitivity}), directly manifesting the Igo proportionality: changes in $V$ and $r_v$ produce nearly indistinguishable effects on $d\sigma/d\Omega$. But can additional observables lift this degeneracy?
+
+%=====================================================
+% STEP-BY-STEP
+%=====================================================
+\textit{Step-by-step constraint analysis.}---I decompose the constraining power by progressively adding information sources (Fig.~\ref{fig:stepwise}).
+
+\emph{Step 1: Elastic $d\sigma/d\Omega$ alone.}---Starting from 17 angular bins at 50~MeV, $D_\mathrm{eff} \approx 1.2$--$1.4$. Only the ``potential radius'' mode is constrained; the eigenvalue spectrum drops by seven orders of magnitude.
+
+\emph{Step 2: Adding $\sigma_R$.}---One additional datum, overwhelmed by 17 angular bins: $D_\mathrm{eff}$ increases by less than 0.001.
+
+\emph{Step 3: Adding $A_y$ and $\sigma_T$.}---The analyzing power probes spin-orbit interference through the spin-flip amplitude $g(\theta)$. For $n+^{40}$Ca, $D_\mathrm{eff}$ rises from 1.18 to 1.52; for $n+^{120}$Sn, from 1.16 to 1.66.
+
+\emph{Step 4: Multi-energy combination.}---The largest improvement. Combining elastic data alone across 7 energies (10--200~MeV) raises $D_\mathrm{eff}$ to 2.12 for $n+^{40}$Ca, by exploiting the energy lever arm: real potential dominates at low energy, absorption at high energy. Including $A_y$ and $\sigma_T$ at all energies yields $D_\mathrm{eff} = 2.18$; for $n+^{120}$Sn, $D_\mathrm{eff} = 2.31$. Dispersive optical models~\cite{Dickhoff2019} exploit precisely such energy correlations through causality-based connections between real and imaginary potential components.
+
+\emph{Step 5: KD02 global systematics.}---Projecting onto the 17-parameter KD02 global model yields $D_\mathrm{eff} \approx 1.0$. This does not indicate lost information---the data still determine the same local-parameter combinations at each energy. Rather, the polynomial energy dependence (e.g., $V(E) = v_1[1 - v_2(E - E_f) + v_3(E-E_f)^2 - v_4(E-E_f)^3]$) introduces redundant degrees of freedom. An analogy: if a fixed ``budget'' of experimental information must be distributed among parameters, the 11-parameter local model concentrates it---$\sim$2 parameters receive most of the budget ($D_\mathrm{eff} \approx 2$). The 17-parameter global model adds 6 higher-order polynomial coefficients ($v_3$, $v_4$, $d_3$, etc.) that each receive effectively zero, diluting $D_\mathrm{eff}$ from 2.2/11 to 1.0/17 without affecting the actual constraints on any observable. This implies that future global optical potentials could use simpler energy-dependent functional forms without sacrificing predictive power.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig_stepwise.pdf}
+\caption{Step-by-step constraint analysis for $n+^{40}$Ca. (a)~$D_\mathrm{eff}$ for 11 local parameters increases as observables and energies are added (Steps 1--4): elastic alone (1.18), $+\sigma_R$ (no change), $+A_y+\sigma_T$ (1.52), multi-energy (2.18). Step~5 re-expresses the same data in terms of 17 KD02 global parameters: $D_\mathrm{eff} \approx 1.0$ of 17 because the polynomial energy dependence has more coefficients than the data can resolve (see text). (b)~Eigenvalue spectra at each step.}
+\label{fig:stepwise}
+\end{figure}
+
+%=====================================================
+% GLOBAL ANALYSIS (brief summary; details in End Matter)
+%=====================================================
+Extending the analysis to the full KD02 universal coefficient space (45 parameters shared across all nuclei and energies; End Matter, Fig.~\ref{fig:global_fisher}) yields $D_\mathrm{eff} = 2.0/45$, with the dominant eigenvector (70\% of information) corresponding to $r_{v0}$ ($|e_1|^2 = 0.94$). With neutron data alone, $D_\mathrm{eff}$ peaks at $\sim$3.2 around 12 systems; adding proton data \emph{decreases} it to the final value of 2.0, because protons reinforce the same dominant directions rather than opening new ones. The Igo ambiguity governs the global constraint structure.
+
+
+%=====================================================
+% CONNECTION TO BAYESIAN ANALYSIS
+%=====================================================
+\textit{Connection to Bayesian analysis.}---The Fisher information matrix provides a rigorous foundation for the empirical findings of King \textit{et al.}~\cite{King2019PRL}, who applied Bayesian MCMC to nucleon-$^{48}$Ca, $^{90}$Zr, and $^{208}$Pb elastic scattering (9 free central parameters, fixing spin-orbit). They found that only $V$ and $r_v$ showed strong correlation, while all other parameter pairs appeared uncorrelated---in stark contrast to the frequentist $\chi^2$ approach, which produced spurious correlations among all parameters.
+
+In the Gaussian (Laplace) approximation, the posterior covariance equals $\Sigma_\mathrm{post} = F^{-1}$: the FIM eigenvalues $\lambda_i$ are the inverse posterior variances along principal axes. Our eigenvector decomposition (Fig.~\ref{fig:eigenvectors}) shows that $\mathbf{e}_1$ is dominated by $r_v$ and $V$ with the same sign (the volume integral direction), producing precisely the elongated $V$-$r_v$ correlation King \textit{et al.} observed. The remaining parameters contribute to sloppy directions with eigenvalues $10^3$--$10^7$ times smaller, rendering their correlations invisible in finite MCMC samples. The condition number of $10^6$--$10^8$ [Fig.~\ref{fig:deff_combined}(c)] also explains the spurious frequentist correlations: projecting a highly anisotropic ``cigar-shaped'' posterior onto a Gaussian tangent plane creates artificial coupling between the elongated and compressed directions.
+
+The Fisher approach is $\sim$4000$\times$ more efficient ($2N_p + 1 = 23$ solver evaluations vs.\ $\sim$100,000 MCMC samples), enabling the systematic 168-configuration scan that would require $\sim$$10^7$ total solver calls with MCMC. The two approaches are complementary: Fisher efficiently maps the global constraint structure and proves exact properties (such as scale-invariance), while MCMC captures non-Gaussian posterior features---such as the asymmetric tails observed by King \textit{et al.}---that become important for precise credible intervals (see End Matter for further comparison).
+
+%=====================================================
+% DISCUSSION AND CONCLUSION
+%=====================================================
+\textit{Discussion and Conclusion.}---The results above answer the three questions posed in the Introduction. (1)~Single-energy elastic scattering constrains only $D_\mathrm{eff} \approx 1.7$ out of 11 parameter combinations; even with all observables and multiple energies, $D_\mathrm{eff}$ reaches only $\sim$2.2. (2)~The scale-invariance of $D_\mathrm{eff}$ proves that improved experimental precision cannot resolve the degeneracy---it is a geometric property of how scattering encodes potential information: $D_\mathrm{eff}$ measures the shape of the eigenvalue spectrum, not the total information content. (3)~The information limit is universal: $D_\mathrm{eff}$ shows no significant dependence on target mass ($A = 12$--$208$), beam energy (10--200~MeV), or projectile type, and persists in the full 45-dimensional universal coefficient space ($D_\mathrm{eff} = 2.0/45$).
+
+The step-by-step decomposition provides actionable experimental guidance: $A_y$ measurements are more valuable than $\sigma_R$ at a single energy, but multi-energy elastic data provide the largest improvement. For heavy targets, backward-angle measurements ($\theta > 130^\circ$) are disproportionately valuable for breaking parameter degeneracies (End Matter, Fig.~\ref{fig:sensitivity}). For rare-isotope beam facilities where beam time is precious, multi-energy angular distributions---even at moderate statistics---yield more constraining power than high-statistics measurements at a single energy.
+
+The same framework could quantify parameter degeneracy in nucleon-nucleon potentials, nuclear density functionals, or astrophysical reaction rates, suggesting that ``sloppiness'' may be a universal feature of effective nuclear interactions.
+
+%=====================================================
+\begin{acknowledgments}
+This work was supported by the National Natural Science Foundation of China (Grant Nos.~12475132 and 12535009) and the Fundamental Research Funds for the Central Universities.
+\end{acknowledgments}
+
+\bibliography{references}
+
+% =====================================================
+% PRL End Matter — placed after references in publication
+% =====================================================
+\onecolumngrid
+\bigskip
+\begin{center}
+\rule{0.5\columnwidth}{0.5pt}\\[6pt]
+{\large\textbf{End Matter}}\\[6pt]
+\rule{0.5\columnwidth}{0.5pt}
+\end{center}
+\twocolumngrid
+
+\textit{Numerical method.}---The Schr\"odinger equation for each partial wave is solved using the Numerov algorithm with matching to Coulomb functions at large radius. For spin-1/2 scattering, the solver iterates over all $(l, j)$ partial wave channels, with the spin-orbit potential entering through the Thomas form with factor of 2 ($\mathbf{l}\cdot\boldsymbol{\sigma} = 2\mathbf{l}\cdot\mathbf{s}$). From the $(l,j)$-resolved $S$-matrix, the direct and spin-flip scattering amplitudes $f(\theta)$ and $g(\theta)$ are constructed, yielding $d\sigma/d\Omega = |f|^2 + |g|^2$, $A_y = 2\mathrm{Im}(fg^*) / (|f|^2 + |g|^2)$, $\sigma_R$, and $\sigma_T$. Parameter sensitivities are computed using central finite differences with $\delta = 0.01 |p_i|$; the $D_\mathrm{eff}$ values are robust to order-of-magnitude variations in $\delta$. The solver has been validated against FRESCO~\cite{Thompson1988}, achieving $S$-matrix agreement to $|\Delta S| < 0.002$ and cross-section agreement to $< 0.2\%$.
+
+\textit{KD02 global parameter analysis.}---The Koning-Delaroche potential~\cite{Koning2003} parametrizes the energy dependence of the 11 local parameters through 17 global parameters per nucleus. For example, the real volume depth follows $V(E) = v_1[1 - v_2(E - E_f) + v_3(E - E_f)^2 - v_4(E - E_f)^3]$, where $E_f$ is the Fermi energy. The geometry parameters ($r_v$, $a_v$, $r_d$, $a_d$) are energy-independent. To analyze constraints on these global parameters, I construct the Jacobian matrix $J = \partial\boldsymbol{\theta}_\mathrm{local}/\partial\boldsymbol{\theta}_\mathrm{global}$, where $\boldsymbol{\theta}_\mathrm{local}$ contains all $11 \times N_E$ local parameters across $N_E$ energies. The global Fisher matrix is then $F_\mathrm{global} = J^T F_\mathrm{combined} J$, where $F_\mathrm{combined} = \mathrm{diag}(F(E_1), \ldots, F(E_{N_E}))$. The eigenvalue spectrum spans 15 orders of magnitude, with the largest eigenvalue corresponding to the energy-independent radius parameters.
+
+\textit{Relation to Bayesian analysis.}---Here we provide additional technical details for the Fisher-Bayesian comparison discussed in the main text. King \textit{et al.}~\cite{King2019PRL} found that:
+\begin{itemize}
+\item Only the depth $V$ and radius $r$ of the real potential showed strong correlation in MCMC scatter plots;
+\item All other parameter pairs exhibited approximately circular (uncorrelated) scatter plots;
+\item The frequentist $\chi^2$ approach produced spurious strong correlations among all parameters;
+\item The frequentist 95\% confidence intervals were unrealistically narrow (44--92\% empirical coverage versus the nominal 95\%).
+\end{itemize}
+
+The narrow frequentist confidence intervals (Table~I of Ref.~\cite{King2019PRL}) are predicted by the Fisher analysis. The frequentist approach samples from the Gaussian approximation $\boldsymbol{\theta} \sim \mathcal{N}(\hat{\boldsymbol{\theta}}, F^{-1})$, valid only near the minimum. But with $D_\mathrm{eff} \approx 1.7$, the $\chi^2$ landscape has $\sim$9 nearly flat directions where the Gaussian approximation breaks down, causing the frequentist method to dramatically underestimate the true parameter uncertainty along sloppy directions.
+
+\textit{Computational advantages.}---The Fisher approach offers several practical advantages over Bayesian MCMC for systematic studies:
+\begin{enumerate}
+\item \emph{Efficiency}: Computing $D_\mathrm{eff}$ for one system requires $2N_p + 1 = 23$ evaluations of the scattering solver (for $N_p = 11$), taking $\sim$20 seconds. King \textit{et al.} required $\sim$100,000 MCMC samples per system. The $\sim$4000-fold speedup enables the systematic scan across 168 configurations---an analysis that would require $\sim$$10^7$ total solver calls with MCMC.
+\item \emph{Analytical results}: The scale-invariance of $D_\mathrm{eff}$ (invariance under $F \to \alpha F$) is an exact mathematical property, whereas establishing this from MCMC would require running chains at multiple noise levels.
+\item \emph{Decomposability}: The Fisher matrix can be additively decomposed by observable ($F = F_\mathrm{elastic} + F_{A_y} + F_{\sigma_R} + \cdots$) and by energy ($F = \sum_E F(E)$), enabling the step-by-step analysis in Fig.~\ref{fig:stepwise}. Bayesian posteriors cannot be similarly decomposed without re-running the full MCMC.
+\item \emph{Subgroup analysis}: Block sub-matrices of $F$ quantify the information content for parameter subgroups (real volume, imaginary, spin-orbit), providing physical insight into which observables constrain which parameters.
+\end{enumerate}
+
+A natural next step is to use the FIM eigenvectors to define an optimal reparameterization that separates stiff from sloppy directions, potentially improving MCMC convergence by orders of magnitude~\cite{Catacora2021}.
+
+\textit{Multi-system global analysis.}---The per-nucleus KD02 analysis uses 11 local parameters specific to a given $(A, Z, E)$ configuration. A natural question is whether combining data from many nuclei and energies can break the information bottleneck. To address this, I extend the analysis to the full KD02 universal coefficient space: 45 parameters that generate all local potentials for any nucleus and energy through analytical prescriptions. These include shared geometry coefficients (e.g., $r_v = r_{v0} - r_{v1} A^{-1/3}$), energy-dependent depth amplitudes with Fermi-energy scales ($\epsilon_{F}^{n}$, $\epsilon_{F}^{p}$), and separate neutron/proton depth coefficients. For each of the 168 configurations (12 nuclei $\times$ 7 energies $\times$ 2 projectiles), the log-space Jacobian $J_i = \partial \log \boldsymbol{\theta}_\mathrm{local} / \partial \log \boldsymbol{\theta}_\mathrm{universal}$ transforms the local Fisher matrix into the universal space, and the combined Fisher matrix is obtained additively:
+\begin{equation}
+F_\mathrm{universal} = \sum_{i=1}^{168} J_i^T \, F_i^\mathrm{local} \, J_i.
+\end{equation}
+
+The central result of this analysis (Fig.~\ref{fig:global_fisher}) is that the information limit persists at the global level: $D_\mathrm{eff} = 2.0$ out of 45 universal parameters. Figure~\ref{fig:global_fisher}(a) shows how $D_\mathrm{eff}$ evolves as systems are added cumulatively. With neutron data alone, the effective dimensionality rises sharply with the first few systems and peaks at $D_\mathrm{eff} \approx 3.2$ around 12 neutron configurations---at this point three independent parameter directions are being constrained. However, adding proton systems causes $D_\mathrm{eff}$ to \emph{decrease} to a final value of $\sim$2.0. This counterintuitive drop occurs because the proton data reinforce the same dominant directions (primarily $r_{v0}$) that the neutron data already constrain, making the eigenvalue spectrum more peaked rather than broadening it. The final $D_\mathrm{eff} = 2.0$ confirms that the information bottleneck is structural: the entire nuclear chart of elastic scattering data constrains only $\sim$2 effective parameter combinations out of 45.
+
+The eigenvalue spectrum [Fig.~\ref{fig:global_fisher}(b)] reveals an extreme hierarchy: the first eigenvalue $\lambda_1 = 2.0 \times 10^8$ carries 70\% of the total Fisher information, the second ($\lambda_2$, 12\%) and third ($\lambda_3$, 8\%) add progressively less, and the top 4 modes capture 90\% of all information, while 8 modes reach 99\%. The remaining $\sim$37 eigenvalues share only $\sim$1\% of the total, spanning 6 orders of magnitude below $\lambda_1$. This near-singular structure means that the 45-dimensional parameter space is effectively collapsed to a $\sim$2-dimensional subspace by the data.
+
+The eigenvector composition [Fig.~\ref{fig:global_fisher}(c)] reveals the physical identity of these constrained directions. The dominant eigenvector $\mathbf{e}_1$ is 94\% $r_{v0}$---the leading coefficient in the real-volume radius parametrization $r_v = r_{v0} - r_{v1} A^{-1/3}$. This confirms that the Igo ambiguity, which governs single-system fits, persists as the dominant feature of the global constraint landscape: elastic scattering across the nuclear chart primarily constrains the nuclear radius scale. The second eigenvector is dominated by $r_{d0}$ (the surface imaginary radius), the third by a mixture of $v_1$ (real depth) and $r_{v1}$ (mass-dependent radius correction). The pattern is clear: scattering data constrain radii far more effectively than depths or diffusenesses, regardless of how many systems are measured.
+
+Interestingly, elastic-only data yield $D_\mathrm{eff} = 2.5/45$---slightly \emph{higher} than the all-observable result ($D_\mathrm{eff} = 2.0/45$). This counterintuitive result illustrates a key distinction: $D_\mathrm{eff}$ measures the \emph{shape} of the eigenvalue spectrum (how uniformly information is distributed), not the total information content ($\mathrm{Tr}\,F$, which always increases with more data). Adding $A_y$ and $\sigma_R$ increases the total Fisher information dramatically---individual eigenvalues grow by factors of 300--500---but deposits it along already-stiff directions (predominantly $r_{v0}$) rather than illuminating new sloppy directions. The result is a \emph{more peaked} eigenvalue distribution, lowering $D_\mathrm{eff}$. This finding has important implications: the route to breaking the information bottleneck is not simply ``more data of the same kind,'' but rather data that probe qualitatively different aspects of the potential. Among the strategies tested in the main text (Fig.~\ref{fig:stepwise}), only multi-energy combination effectively opens new constraining directions, because different beam energies sample different radial regions of the potential.
+
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig_global_fisher.pdf}
+\caption{Global Fisher analysis in the 45-dimensional universal KD02 coefficient space. (a)~$D_\mathrm{eff}$ evolution as systems are added: neutron data (green) peak at $\sim$3.2 around 12 systems, then adding proton data (pink) \emph{decreases} $D_\mathrm{eff}$ to a final value of $\sim$2.0, because protons reinforce existing stiff directions rather than opening new ones. (b)~Eigenvalue spectrum showing the first mode carries 70\% of all information; 4 modes suffice for 90\%. (c)~Eigenvector composition of the top 6 modes. The dominant mode $\mathbf{e}_1$ is 94\% $r_{v0}$ (the real potential radius coefficient), confirming that the Igo ambiguity governs the global constraint structure.}
+\label{fig:global_fisher}
+\end{figure*}
+
+\textit{Angle-resolved sensitivity and information geometry.}---To understand \emph{why} the information bottleneck arises, I examine the angular structure of parameter sensitivities. Figure~\ref{fig:sensitivity}(a) shows the raw cross section gradients $|\partial(d\sigma/d\Omega)/\partial p_i|$ for three key parameters of the KD02 potential, computed for $n+^{40}$Ca at 50~MeV via finite differences with the Numerov solver. The derivatives are plotted on a logarithmic scale to reveal structure over the full dynamic range.
+
+The most striking result is that $|\partial\sigma/\partial V|$ (green, circles) and $|\partial\sigma/\partial r_v|$ (pink, squares) track each other over more than five orders of magnitude, sharing identical diffraction oscillation patterns with a roughly constant offset. This near-proportionality $\partial\sigma/\partial V \propto \partial\sigma/\partial r_v$ at every angle is the direct manifestation of the Igo ambiguity~\cite{Igo1959}: because the scattering depends on $V$ and $r_v$ primarily through the combination $V r_v^\alpha$, a simultaneous change $\delta V$ and $\delta r_v$ along this constraint surface produces nearly canceling effects on $d\sigma/d\Omega$. In the language of information geometry, the gradient vectors $\nabla_V \sigma(\theta)$ and $\nabla_{r_v} \sigma(\theta)$ are nearly collinear in the function space of angular distributions, producing a near-zero eigenvalue of the Fisher matrix.
+
+In contrast, the surface imaginary gradient $|\partial\sigma/\partial W_d|$ (purple, diamonds) shows a distinctly different angular dependence: it does not drop as steeply toward backward angles as $V$ and $r_v$, and it crosses above $|\partial\sigma/\partial r_v|$ at large angles. This angular separation reflects the surface-peaked Woods-Saxon derivative form factor of $W_d$, which couples to a different radial region of the nucleus. The partial independence of $W_d$ from the $V$--$r_v$ degenerate direction is precisely why $D_\mathrm{eff} \approx 1.2$ rather than exactly 1.
+
+Figure~\ref{fig:sensitivity}(b) shows the cumulative effective dimensionality $D_\mathrm{eff}(\theta_\mathrm{max})$, computed from the Fisher matrix integrated over $\theta \in [5^\circ, \theta_\mathrm{max}]$. The curve is sharply non-monotonic: $D_\mathrm{eff}$ peaks at $\sim$2.0 at $\theta_\mathrm{max} = 25^\circ$, in the Coulomb-nuclear interference region where the richest diffraction structure provides the most diverse constraints. As backward angles are included, information accumulates predominantly along the dominant $V$--$r_v$ direction, making the eigenvalue spectrum more peaked and reducing $D_\mathrm{eff}$. The final value $D_\mathrm{eff} = 1.21$ is reached at full angular coverage. This reveals an important subtlety: $D_\mathrm{eff}$ can temporarily \emph{exceed} its final value at restricted angular ranges, because the forward-angle diffraction pattern distributes information more uniformly across parameters than full-coverage data. Extending angular coverage increases the \emph{total} Fisher information ($\mathrm{Tr}\,F$) but concentrates it more heavily along the dominant direction, thereby reducing $D_\mathrm{eff}$.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{fig_sensitivity_v2.pdf}
+\caption{Angle-resolved sensitivity for $n+^{40}$Ca at 50~MeV. (a)~Raw cross section gradients $|\partial(d\sigma/d\Omega)/\partial p_i|$ on a log scale: $V$ and $r_v$ track each other over 5 decades with the same diffraction oscillation pattern, demonstrating the Igo proportionality $\partial\sigma/\partial V \propto \partial\sigma/\partial r_v$. $W_d$ shows a distinctly different angular dependence, particularly at backward angles. (b)~Cumulative $D_\mathrm{eff}(\theta_\mathrm{max})$: peaks at $\sim$2.0 at $25^\circ$ where the Coulomb-nuclear diffraction pattern provides the most diverse constraints, then decreases as backward-angle data concentrates information along the dominant $V$--$r_v$ direction, settling to $D_\mathrm{eff} = 1.21$ at full coverage.}
+\label{fig:sensitivity}
+\end{figure}
+
+\end{document}
