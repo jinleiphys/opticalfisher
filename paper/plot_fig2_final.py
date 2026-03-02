@@ -90,7 +90,7 @@ def plot_fig2(data, save_path):
 
     # === (b) D_eff vs Energy ===
     ax2 = axes[1]
-    E_vals = np.array(data['energy_scan']['energies'])
+    E_vals = np.array(data['energy_scan']['E'])
     D_eff_E = np.array(data['energy_scan']['D_eff_n'])
 
     ax2.plot(E_vals, D_eff_E, 'o-', color=COLORS['dark_green'],
@@ -140,11 +140,42 @@ def main():
     print("="*60)
 
     base_dir = os.path.dirname(__file__)
-    data_path = os.path.join(base_dir, '..', 'data', 'deff_scan_data.json')
+    data_path = os.path.join(base_dir, '..', 'data', 'deff_scan_extended.json')
 
     print(f"\nLoading data from {data_path}...")
     with open(data_path, 'r') as f:
-        data = json.load(f)
+        raw = json.load(f)
+
+    # Convert to the format expected by plot_fig2
+    entries = [d for d in raw['data'] if 'deff_results' in d]
+    deff_key = 'elastic_13p'
+    full_scan = []
+    for e in entries:
+        full_scan.append({
+            'name': e['nucleus'], 'A': e['A'], 'E': e['E'],
+            'projectile': e['projectile'],
+            'D_eff': e['deff_results'][deff_key]['D_eff'],
+            'cond': e['deff_results'][deff_key]['condition_number'],
+        })
+    nuc_scan = [r for r in full_scan if r['E'] == 50 and r['projectile'] == 'n']
+    nuc_scan.sort(key=lambda r: r['A'])
+    eng_scan = [r for r in full_scan if r['A'] == 40 and r['projectile'] == 'n']
+    eng_scan.sort(key=lambda r: r['E'])
+    data = {
+        'full_scan': full_scan,
+        'nuclei_scan': {
+            'A': [r['A'] for r in nuc_scan],
+            'D_eff_n': [r['D_eff'] for r in nuc_scan],
+            'nuclei': [r['name'] for r in nuc_scan],
+            'cond_n': [r['cond'] for r in nuc_scan],
+        },
+        'energy_scan': {
+            'E': [r['E'] for r in eng_scan],
+            'D_eff_n': [r['D_eff'] for r in eng_scan],
+            'cond_n': [r['cond'] for r in eng_scan],
+        },
+    }
+    print(f"Using {deff_key}: {len(entries)} entries")
 
     save_path = os.path.join(base_dir, 'fig2_deff_combined.png')
     plot_fig2(data, save_path)

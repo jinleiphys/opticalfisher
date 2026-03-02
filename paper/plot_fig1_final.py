@@ -157,11 +157,29 @@ def main():
     print("="*60)
 
     base_dir = os.path.dirname(__file__)
-    data_path = os.path.join(base_dir, '..', 'data', 'deff_scan_data.json')
+    data_path = os.path.join(base_dir, '..', 'data', 'deff_scan_extended.json')
 
     print(f"\nLoading data from {data_path}...")
     with open(data_path, 'r') as f:
-        data = json.load(f)
+        raw = json.load(f)
+
+    # Convert to the format expected by plot_fig1
+    entries = [d for d in raw['data'] if 'deff_results' in d]
+    deff_key = 'elastic_13p'
+    full_scan = []
+    for e in entries:
+        full_scan.append({
+            'name': e['nucleus'], 'A': e['A'], 'E': e['E'],
+            'projectile': e['projectile'],
+            'D_eff': e['deff_results'][deff_key]['D_eff'],
+        })
+    data = {
+        'full_scan': full_scan,
+        'full_scan_n': [r for r in full_scan if r['projectile'] == 'n'],
+        'full_scan_p': [r for r in full_scan if r['projectile'] == 'p'],
+    }
+    print(f"Using {deff_key}: {len(entries)} entries, D_eff range "
+          f"{min(r['D_eff'] for r in full_scan):.2f}--{max(r['D_eff'] for r in full_scan):.2f}")
 
     save_path = os.path.join(base_dir, 'fig1_deff_universal.png')
     plot_fig1(data, save_path)
