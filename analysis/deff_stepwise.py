@@ -29,8 +29,8 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from potentials import KD02Potential
 
-from deff_scan_extended import (compute_observables_vector, get_kd02_params_11,
-                                 kd02_potential_11params)
+from deff_scan_extended import (compute_observables_vector, get_kd02_params_13,
+                                 kd02_potential_13params)
 
 
 # Parameter group indices
@@ -38,9 +38,10 @@ IDX_REAL = [0, 1, 2]          # V, rv, av
 IDX_IMAG_VOL = [3, 4, 5]     # W, rw, aw
 IDX_IMAG_SURF = [6, 7, 8]    # Wd, rvd, avd
 IDX_IMAG = [3, 4, 5, 6, 7, 8]  # all imaginary
-IDX_SO = [9, 10]              # Vso, Wso
+IDX_SO = [9, 10, 11, 12]     # Vso, Wso, rvso, avso
 
-PARAM_NAMES = ['V', 'rv', 'av', 'W', 'rw', 'aw', 'Wd', 'rvd', 'avd', 'Vso', 'Wso']
+PARAM_NAMES = ['V', 'rv', 'av', 'W', 'rw', 'aw', 'Wd', 'rvd', 'avd',
+               'Vso', 'Wso', 'rvso', 'avso']
 GROUP_NAMES = ['Real Volume', 'Imaginary', 'Spin-Orbit']
 GROUP_INDICES = [IDX_REAL, IDX_IMAG, IDX_SO]
 
@@ -55,23 +56,23 @@ def compute_deff(F):
     return s**2 / np.sum(ev**2), np.sort(ev)[::-1]
 
 
-def compute_gradients_all(proj, A, Z, E_lab, theta_deg, params, rvso, avso,
+def compute_gradients_all(proj, A, Z, E_lab, theta_deg, params,
                            eps_rel=0.01, l_max=30, delta_Ay=0.03):
     """
     Compute gradient matrices for each observable separately.
 
     Returns:
-        G_elastic: (11, n_angles) — d log σ / d log p_i
-        G_Ay:      (11, n_angles) — p * dAy/dp / delta_Ay
-        G_sigR:    (11, 1)        — d log σ_R / d log p_i
-        G_sigT:    (11, 1) or None — d log σ_T / d log p_i (neutrons only)
+        G_elastic: (13, n_angles) — d log σ / d log p_i
+        G_Ay:      (13, n_angles) — p * dAy/dp / delta_Ay
+        G_sigR:    (13, 1)        — d log σ_R / d log p_i
+        G_sigT:    (13, 1) or None — d log σ_T / d log p_i (neutrons only)
         obs_0: baseline observables
     """
     n_params = len(params)
     n_angles = len(theta_deg)
 
     obs_0 = compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,
-                                        rvso, avso, l_max)
+                                        l_max)
 
     G_elastic = np.zeros((n_params, n_angles))
     G_Ay = np.zeros((n_params, n_angles))
@@ -88,9 +89,9 @@ def compute_gradients_all(proj, A, Z, E_lab, theta_deg, params, rvso, avso,
         params_minus[i] -= delta
 
         obs_p = compute_observables_vector(proj, A, Z, E_lab, theta_deg,
-                                            params_plus, rvso, avso, l_max)
+                                            params_plus, l_max)
         obs_m = compute_observables_vector(proj, A, Z, E_lab, theta_deg,
-                                            params_minus, rvso, avso, l_max)
+                                            params_minus, l_max)
 
         p_i = params[i]
 
@@ -130,7 +131,7 @@ def kd02_global_jacobian(proj, A, Z, energies, eps_rel=0.005):
     """
     Compute Jacobian d(local_params) / d(global_params) for KD02.
 
-    At each energy E, the 11 local params [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso]
+    At each energy E, the 13 local params [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso]
     are determined by KD02 formulas from A, Z, E and a set of global coefficients.
 
     For a FIXED nucleus (A, Z), the energy-independent geometry params are:
@@ -139,14 +140,14 @@ def kd02_global_jacobian(proj, A, Z, energies, eps_rel=0.005):
         V(E), W(E), Wd(E), Vso(E), Wso(E)
 
     Global parameters (for given A, Z):
-        [rv, av, rvd, avd,   ← geometry (4, energy-independent)
+        [rv, av, rvd, avd, rvso, avso,   ← geometry (6, energy-independent)
          v1, w1, d1, vso1, wso1,  ← depth amplitudes (5)
          v2, v3, w2, d2, d3, vso2, wso2,  ← depth shape (7)
          ef]  ← Fermi energy (1)
-    Total: 17 global params → 11*N_E local params
+    Total: 19 global params → 13*N_E local params
 
     Returns:
-        J: Jacobian matrix (11*N_E, N_global)
+        J: Jacobian matrix (13*N_E, N_global)
         global_param_names: list of global parameter names
         global_param_values: nominal values
     """
@@ -188,23 +189,26 @@ def kd02_global_jacobian(proj, A, Z, energies, eps_rel=0.005):
     rv = 1.3039 - 0.4054 * A**(-1./3.)
     av = 0.6778 - 1.487e-4 * A
     rvd = 1.3424 - 0.01585 * A**(1./3.)
+    rvso = 1.1854 - 0.647 * A**(-1./3.)
+    avso = 0.59
 
-    global_names = ['rv', 'av', 'rvd', 'avd',
+    global_names = ['rv', 'av', 'rvd', 'avd', 'rvso', 'avso',
                     'v1', 'w1', 'd1', 'vso1', 'wso1',
                     'v2', 'v3', 'w2', 'd2', 'd3', 'vso2', 'wso2', 'ef']
-    global_vals = [rv, av, rvd, avd,
+    global_vals = [rv, av, rvd, avd, rvso, avso,
                    v1, w1, d1, vso1, wso1,
                    v2, v3, w2, d2_val, d3, vso2, wso2, ef]
     N_global = len(global_vals)
 
     # Compute Jacobian by finite differences
-    J = np.zeros((11 * N_E, N_global))
+    N_local = 13
+    J = np.zeros((N_local * N_E, N_global))
 
     def local_params_from_globals(gvals):
         """Compute all local params at all energies from global params."""
-        rv_g, av_g, rvd_g, avd_g = gvals[0:4]
-        v1_g, w1_g, d1_g, vso1_g, wso1_g = gvals[4:9]
-        v2_g, v3_g, w2_g, d2_g, d3_g, vso2_g, wso2_g, ef_g = gvals[9:17]
+        rv_g, av_g, rvd_g, avd_g, rvso_g, avso_g = gvals[0:6]
+        v1_g, w1_g, d1_g, vso1_g, wso1_g = gvals[6:11]
+        v2_g, v3_g, w2_g, d2_g, d3_g, vso2_g, wso2_g, ef_g = gvals[11:19]
 
         all_local = []
         for E in energies:
@@ -215,10 +219,11 @@ def kd02_global_jacobian(proj, A, Z, energies, eps_rel=0.005):
             Vso_loc = vso1_g * np.exp(-vso2_g * f)
             Wso_loc = wso1_g * f**2 / (f**2 + wso2_g**2)
 
-            # local: [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso]
+            # local: [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso]
             # Note: rw=rv, aw=av in KD02
             local = [V_loc, rv_g, av_g, W_loc, rv_g, av_g,
-                     Wd_loc, rvd_g, avd_g, Vso_loc, Wso_loc]
+                     Wd_loc, rvd_g, avd_g, Vso_loc, Wso_loc,
+                     rvso_g, avso_g]
             all_local.extend(local)
         return np.array(all_local)
 
@@ -252,7 +257,7 @@ def stepwise_analysis(proj, A, Z, name, energies, theta_deg, l_max=30):
         4. Multi-energy combined
         5. KD02 global parameter Fisher
     """
-    n_params = 11
+    n_params = 13
     result = {
         'projectile': proj, 'nucleus': name, 'A': A, 'Z': Z,
         'energies': energies, 'param_names': PARAM_NAMES,
@@ -267,11 +272,11 @@ def stepwise_analysis(proj, A, Z, name, energies, theta_deg, l_max=30):
     all_params = {}
 
     for E in energies:
-        params, rvso, avso = get_kd02_params_11(proj, A, Z, E)
+        params = get_kd02_params_13(proj, A, Z, E)
         all_params[E] = params
 
         G_el, G_Ay, G_sr, G_st, obs_0 = compute_gradients_all(
-            proj, A, Z, E, theta_deg, params, rvso, avso, l_max=l_max)
+            proj, A, Z, E, theta_deg, params, l_max=l_max)
 
         all_G_elastic[E] = G_el
         all_G_Ay[E] = G_Ay
@@ -366,28 +371,28 @@ def stepwise_analysis(proj, A, Z, name, energies, theta_deg, l_max=30):
     J, global_names, global_vals = kd02_global_jacobian(
         proj, A, Z, energies)
 
-    # Build full block-diagonal local Fisher (11*N_E × 11*N_E)
+    # Build full block-diagonal local Fisher (13*N_E × 13*N_E)
     N_E = len(energies)
-    F_block = np.zeros((11 * N_E, 11 * N_E))
+    F_block = np.zeros((n_params * N_E, n_params * N_E))
     for ie, E in enumerate(energies):
         parts_E = [all_G_elastic[E], all_G_sigR[E], all_G_Ay[E]]
         if proj == 'n' and all_G_sigT[E] is not None:
             parts_E.append(all_G_sigT[E])
         G_E = np.hstack(parts_E)
         F_E = G_E @ G_E.T
-        F_block[ie*11:(ie+1)*11, ie*11:(ie+1)*11] = F_E
+        F_block[ie*n_params:(ie+1)*n_params, ie*n_params:(ie+1)*n_params] = F_E
 
     # Transform to global parameters
     F_global = J.T @ F_block @ J
     D5, ev5 = compute_deff(F_global)
 
     # Subgroup mapping for global params:
-    # [rv, av, rvd, avd, v1, w1, d1, vso1, wso1, v2, v3, w2, d2, d3, vso2, wso2, ef]
-    #  0   1   2    3    4   5   6   7     8     9  10  11  12  13  14    15    16
-    IDX_GLOBAL_GEOM = [0, 1, 2, 3]  # geometry
-    IDX_GLOBAL_REAL_DEPTH = [4, 9, 10, 16]  # v1, v2, v3, ef (real depth params)
-    IDX_GLOBAL_IMAG_DEPTH = [5, 6, 11, 12, 13]  # w1, d1, w2, d2, d3
-    IDX_GLOBAL_SO = [7, 8, 14, 15]  # vso1, wso1, vso2, wso2
+    # [rv, av, rvd, avd, rvso, avso, v1, w1, d1, vso1, wso1, v2, v3, w2, d2, d3, vso2, wso2, ef]
+    #  0   1   2    3    4     5     6   7   8   9     10    11  12  13  14  15  16    17    18
+    IDX_GLOBAL_GEOM = [0, 1, 2, 3, 4, 5]  # geometry (incl SO geometry)
+    IDX_GLOBAL_REAL_DEPTH = [6, 11, 12, 18]  # v1, v2, v3, ef (real depth params)
+    IDX_GLOBAL_IMAG_DEPTH = [7, 8, 13, 14, 15]  # w1, d1, w2, d2, d3
+    IDX_GLOBAL_SO = [9, 10, 16, 17]  # vso1, wso1, vso2, wso2
 
     global_group_names = ['Geometry', 'Real Depth', 'Imag Depth', 'SO Depth']
     global_group_indices = [IDX_GLOBAL_GEOM, IDX_GLOBAL_REAL_DEPTH,
@@ -411,7 +416,7 @@ def main():
     print("Step-by-Step Constraint Analysis")
     print("=" * 70)
 
-    theta_deg = np.linspace(10, 170, 17)
+    theta_deg = np.linspace(5, 175, 35)
     energies = [10, 20, 30, 50, 100, 150, 200]
 
     cases = [

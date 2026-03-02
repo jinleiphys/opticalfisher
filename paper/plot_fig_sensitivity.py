@@ -2,7 +2,7 @@
 """
 PRL Figure: Angle-Resolved Sensitivity Analysis
 
-Panel (a): S_i(theta) curves for all 11 parameters
+Panel (a): S_i(theta) curves for all 13 parameters
 Panel (b): Cumulative Fisher information and D_eff(theta_max)
 
 Shows that diffuseness parameters gain information at backward angles,
@@ -114,13 +114,13 @@ def plot_fig_sensitivity(data, save_path, case_idx=0):
     raw_Wd = np.abs(S_dcs[idx_Wd] * sigma / params_val[idx_Wd])
 
     # Plot raw derivatives on log scale
-    ax1.semilogy(theta, raw_V, '-', color='#198754', marker='o',
+    ax1.semilogy(theta, raw_V, '-', color=COLORS['dark_green'], marker='o',
                  linewidth=1.5, markersize=3, markevery=4,
                  label=r'$|\partial\sigma/\partial V|$')
-    ax1.semilogy(theta, raw_rv, '--', color='#D63384', marker='s',
+    ax1.semilogy(theta, raw_rv, '--', color=COLORS['dark_pink'], marker='s',
                  linewidth=1.5, markersize=3, markevery=4,
                  label=r'$|\partial\sigma/\partial r_v|$')
-    ax1.semilogy(theta, raw_Wd, ':', color='#6F42C1', marker='D',
+    ax1.semilogy(theta, raw_Wd, ':', color='#C8A2C8', marker='D',
                  linewidth=1.5, markersize=3, markevery=4,
                  label=r'$|\partial\sigma/\partial W_d|$')
 
@@ -136,7 +136,7 @@ def plot_fig_sensitivity(data, save_path, case_idx=0):
     # === Panel (b): Cumulative D_eff ===
     ax2 = axes[1]
 
-    ax2.plot(theta, D_eff_cumul, '-', color=COLORS['dark_purple'],
+    ax2.plot(theta, D_eff_cumul, '-', color=COLORS['dark_green'],
              linewidth=1.5, label=r'$D_\mathrm{eff}(\theta_\mathrm{max})$')
 
     # Mark final D_eff level
@@ -149,8 +149,8 @@ def plot_fig_sensitivity(data, save_path, case_idx=0):
     ax2.annotate(f'peak: {D_eff_cumul[idx_peak]:.1f} at {theta[idx_peak]:.0f}°',
                  xy=(theta[idx_peak], D_eff_cumul[idx_peak]),
                  xytext=(theta[idx_peak] + 15, D_eff_cumul[idx_peak] - 0.05),
-                 fontsize=7, color=COLORS['dark_purple'],
-                 arrowprops=dict(arrowstyle='->', color=COLORS['dark_purple'],
+                 fontsize=7, color=COLORS['dark_green'],
+                 arrowprops=dict(arrowstyle='->', color=COLORS['dark_green'],
                                  lw=1.0))
 
     ax2.text(0.95, 0.15, f'$D_{{\\mathrm{{eff}}}}$ = {D_final:.2f}',

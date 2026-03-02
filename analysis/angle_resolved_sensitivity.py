@@ -23,12 +23,12 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from potentials import KD02Potential
-from deff_scan_extended import (kd02_potential_11params, compute_observables_vector,
-                                 get_kd02_params_11)
+from deff_scan_extended import (kd02_potential_13params, compute_observables_vector,
+                                 get_kd02_params_13)
 
 
 def compute_angle_sensitivity(proj, A, Z, E_lab, theta_dense, params,
-                               rvso, avso, eps_rel=0.01, l_max=30):
+                               eps_rel=0.01, l_max=30):
     """
     Compute S_i(theta) = d log sigma / d log p_i for each parameter.
 
@@ -44,7 +44,7 @@ def compute_angle_sensitivity(proj, A, Z, E_lab, theta_dense, params,
     delta_Ay = 0.03
 
     obs_0 = compute_observables_vector(proj, A, Z, E_lab, theta_dense,
-                                        params, rvso, avso, l_max)
+                                        params, l_max)
 
     S_dcs = np.zeros((n_params, n_angles))
     S_Ay = np.zeros((n_params, n_angles))
@@ -61,9 +61,9 @@ def compute_angle_sensitivity(proj, A, Z, E_lab, theta_dense, params,
         params_minus[i] -= delta
 
         obs_p = compute_observables_vector(proj, A, Z, E_lab, theta_dense,
-                                            params_plus, rvso, avso, l_max)
+                                            params_plus, l_max)
         obs_m = compute_observables_vector(proj, A, Z, E_lab, theta_dense,
-                                            params_minus, rvso, avso, l_max)
+                                            params_minus, l_max)
 
         # dlog(sigma)/dlog(p)
         dcs_0 = obs_0['elastic_dcs']
@@ -110,7 +110,7 @@ def main():
     print("=" * 70)
 
     param_names = ['V', 'rv', 'av', 'W', 'rw', 'aw', 'Wd', 'rvd', 'avd',
-                   'Vso', 'Wso']
+                   'Vso', 'Wso', 'rvso', 'avso']
 
     theta_dense = np.linspace(5, 175, 35)
 
@@ -130,10 +130,10 @@ def main():
     for proj, A, Z, name, E in cases:
         print(f"\n--- {proj}+{name} @ {E} MeV ---")
 
-        params, rvso, avso = get_kd02_params_11(proj, A, Z, E)
+        params = get_kd02_params_13(proj, A, Z, E)
 
         S_dcs, S_Ay, obs_0 = compute_angle_sensitivity(
-            proj, A, Z, E, theta_dense, params, rvso, avso)
+            proj, A, Z, E, theta_dense, params)
 
         C_i, D_eff_cumul = cumulative_fisher_info(S_dcs, theta_dense)
 

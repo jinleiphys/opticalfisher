@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Extended D_eff scan: 11-parameter KD02 with spin-orbit + multiple observables.
+Extended D_eff scan: 13-parameter KD02 with spin-orbit + multiple observables.
 
 Computes Fisher Information and D_eff for elastic dsigma/dOmega, analyzing
 power Ay, reaction cross section sigma_R, and total cross section sigma_T.
 
-Parameters: [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso]
-   (SO geometry rvso, avso fixed at KD02 values)
+Parameters: [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso]
+   (all 13 KD02 parameters including SO geometry)
 
 Author: Jin Lei
 Date: February 2026
@@ -16,6 +16,7 @@ import numpy as np
 import json
 import sys
 import os
+from multiprocessing import Pool, cpu_count
 
 # Local imports from src/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -30,16 +31,15 @@ M_PION = 139.5706
 LAMBDA_PI_SQ = (HBARC / M_PION)**2
 
 
-def kd02_potential_11params(r, l, j, A, Z_proj, Z, params, rvso, avso):
+def kd02_potential_13params(r, l, j, A, Z_proj, Z, params):
     """
-    KD02-style potential with 11 free parameters, including spin-orbit.
+    KD02-style potential with 13 free parameters, including spin-orbit geometry.
 
-    params = [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso]
-    rvso, avso: fixed spin-orbit geometry from KD02
+    params = [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso]
 
     Returns complex potential array (MeV).
     """
-    V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso = params
+    V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso = params
     r = np.atleast_1d(np.asarray(r, dtype=float))
     A_third = A ** (1.0 / 3.0)
 
@@ -88,7 +88,7 @@ def adaptive_lmax(A, E_lab, min_lmax=30):
 
 
 def compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,
-                                rvso, avso, l_max=None):
+                                l_max=None):
     """
     Compute all observables for given parameters.
 
@@ -104,8 +104,7 @@ def compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,
         l_max = adaptive_lmax(A, E_lab)
 
     def pot_lj(r, l, j):
-        return kd02_potential_11params(r, l, j, A, Z_proj, Z, params,
-                                       rvso, avso)
+        return kd02_potential_13params(r, l, j, A, Z_proj, Z, params)
 
     solver = ScatteringSolverFortran(r_max=40.0, hcm=0.02, l_max=l_max)
     results = solver.solve_spin_half(pot_lj, E_cm, mu,
@@ -169,14 +168,14 @@ def build_gradient_vector(obs_0, obs_plus, obs_minus, delta, param_val,
 
 
 def compute_fisher_extended(proj, A, Z, E_lab, theta_deg, params,
-                             rvso, avso, eps_rel=0.01, l_max=None,
+                             eps_rel=0.01, l_max=None,
                              delta_Ay=0.03):
     """
-    Compute Fisher matrix for 11 parameters with all observables.
+    Compute Fisher matrix for 13 parameters with all observables.
 
     Returns:
-        F: Fisher matrix (11 x 11)
-        gradients: gradient matrix (11 x n_data)
+        F: Fisher matrix (13 x 13)
+        gradients: gradient matrix (13 x n_data)
         obs_0: baseline observables dict
         n_data: dict with number of data points per observable type
     """
@@ -184,7 +183,7 @@ def compute_fisher_extended(proj, A, Z, E_lab, theta_deg, params,
 
     # Baseline observables
     obs_0 = compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,
-                                        rvso, avso, l_max)
+                                        l_max)
 
     n_angles = len(theta_deg)
     n_data_dcs = n_angles
@@ -207,9 +206,9 @@ def compute_fisher_extended(proj, A, Z, E_lab, theta_deg, params,
         params_minus[i] -= delta
 
         obs_p = compute_observables_vector(proj, A, Z, E_lab, theta_deg,
-                                            params_plus, rvso, avso, l_max)
+                                            params_plus, l_max)
         obs_m = compute_observables_vector(proj, A, Z, E_lab, theta_deg,
-                                            params_minus, rvso, avso, l_max)
+                                            params_minus, l_max)
 
         gradients[i] = build_gradient_vector(obs_0, obs_p, obs_m, delta,
                                               params[i], proj, delta_Ay)
@@ -256,39 +255,53 @@ def compute_deff_subsets(F_full, gradients, n_data, proj):
 
     results = {}
 
-    # --- Observable subsets (all 11 params) ---
+    # --- Observable subsets (all 13 params) ---
 
     # Elastic only
     g_dcs = gradients[:, :n_dcs]
     F_dcs = g_dcs @ g_dcs.T
     D, ev, cn = compute_deff(F_dcs)
-    results['elastic_11p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
+    results['elastic_13p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
 
     # Elastic + Ay
     g_dcs_Ay = gradients[:, :n_dcs + n_Ay]
     F_dcs_Ay = g_dcs_Ay @ g_dcs_Ay.T
     D, ev, cn = compute_deff(F_dcs_Ay)
-    results['elastic_Ay_11p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
+    results['elastic_Ay_13p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
 
     # Elastic + sigma_R
     cols = list(range(n_dcs)) + [n_dcs + n_Ay]
     g_sub = gradients[:, cols]
     F_sub = g_sub @ g_sub.T
     D, ev, cn = compute_deff(F_sub)
-    results['elastic_sigR_11p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
+    results['elastic_sigR_13p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
 
     # Elastic + Ay + sigma_R
     cols = list(range(n_dcs + n_Ay)) + [n_dcs + n_Ay]
     g_sub = gradients[:, cols]
     F_sub = g_sub @ g_sub.T
     D, ev, cn = compute_deff(F_sub)
-    results['elastic_Ay_sigR_11p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
+    results['elastic_Ay_sigR_13p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
 
-    # All observables (11 params)
+    # All observables (13 params)
     D, ev, cn = compute_deff(F_full)
+    results['all_13p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
+
+    # --- 11-param subsets (no SO geometry: rvso, avso) ---
+    g11 = gradients[:11, :]
+
+    # Elastic only, 11 params
+    g11_dcs = g11[:, :n_dcs]
+    F11 = g11_dcs @ g11_dcs.T
+    D, ev, cn = compute_deff(F11)
+    results['elastic_11p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
+
+    # All observables, 11 params
+    F11_all = g11 @ g11.T
+    D, ev, cn = compute_deff(F11_all)
     results['all_11p'] = {'D_eff': D, 'eigenvalues': ev.tolist(), 'cond': cn}
 
-    # --- 9-param subsets (central only, no Vso/Wso) ---
+    # --- 9-param subsets (central only, no Vso/Wso/rvso/avso) ---
     g9 = gradients[:9, :]
 
     # Elastic only, 9 params
@@ -305,10 +318,9 @@ def compute_deff_subsets(F_full, gradients, n_data, proj):
     return results
 
 
-def get_kd02_params_11(projectile, A, Z, E_lab):
+def get_kd02_params_13(projectile, A, Z, E_lab):
     """
-    Get 11 KD02 parameters: [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso]
-    Also returns fixed SO geometry (rvso, avso).
+    Get 13 KD02 parameters: [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso]
     """
     pot = KD02Potential(projectile, A, Z, E_lab)
     params = [
@@ -316,15 +328,53 @@ def get_kd02_params_11(projectile, A, Z, E_lab):
         pot.W, pot.rw, pot.aw,
         pot.Wd, pot.rvd, pot.avd,
         pot.Vso, pot.Wso,
+        pot.rvso, pot.avso,
     ]
-    return params, pot.rvso, pot.avso
+    return params
+
+
+def _compute_one_config(args):
+    """Worker function for parallel computation of one (proj, A, Z, E) config."""
+    proj, A, Z, name, E, theta_deg = args
+    try:
+        params = get_kd02_params_13(proj, A, Z, E)
+        F, gradients, obs_0, n_data = compute_fisher_extended(
+            proj, A, Z, E, theta_deg, params
+        )
+        subsets = compute_deff_subsets(F, gradients, n_data, proj)
+
+        entry = {
+            'projectile': proj, 'nucleus': name,
+            'A': A, 'Z': Z, 'E': E,
+            'params': params,
+            'sigma_R': float(obs_0['sigma_R']),
+            'fisher_matrix': F.tolist(),
+            'deff_results': {},
+        }
+        if proj == 'n':
+            entry['sigma_T'] = float(obs_0['sigma_T'])
+        for key, val in subsets.items():
+            entry['deff_results'][key] = {
+                'D_eff': float(val['D_eff']),
+                'condition_number': float(val['cond']),
+                'eigenvalues': val['eigenvalues'],
+            }
+        d9 = subsets['elastic_9p']['D_eff']
+        d13 = subsets['elastic_13p']['D_eff']
+        print(f"  {proj}+{name}@{E}MeV: elastic(9p)={d9:.2f} elastic(13p)={d13:.2f}"
+              f"  sigma_R={obs_0['sigma_R']:.1f} mb")
+        return entry
+    except Exception as e:
+        print(f"  ERROR {proj}+{name}@{E}MeV: {e}")
+        return {'projectile': proj, 'nucleus': name, 'A': A, 'Z': Z, 'E': E,
+                'error': str(e)}
 
 
 def main():
-    """Extended D_eff scan with 11 parameters and multiple observables."""
+    """Extended D_eff scan with 13 parameters and multiple observables."""
 
     print("=" * 70)
-    print("Extended D_eff Scan: 11-param KD02 + spin-orbit observables")
+    print("Extended D_eff Scan: 13-param KD02 + spin-orbit observables")
     print("=" * 70)
 
     nuclei = [
@@ -345,9 +395,25 @@ def main():
     energies = [10, 20, 30, 50, 100, 150, 200]
     projectiles = ['n', 'p']
 
-    param_names_11 = ['V', 'rv', 'av', 'W', 'rw', 'aw',
-                      'Wd', 'rvd', 'avd', 'Vso', 'Wso']
-    theta_deg = np.linspace(10, 170, 17)
+    param_names_13 = ['V', 'rv', 'av', 'W', 'rw', 'aw',
+                      'Wd', 'rvd', 'avd', 'Vso', 'Wso', 'rvso', 'avso']
+    theta_deg = np.linspace(5, 175, 35)
+
+    # Build task list
+    tasks = []
+    for proj in projectiles:
+        for A, Z, name in nuclei:
+            for E in energies:
+                tasks.append((proj, A, Z, name, E, theta_deg))
+
+    total = len(tasks)
+    print(f"Total configurations: {total}")
+
+    # Parallel computation
+    n_workers = min(cpu_count(), 8)
+    print(f"Using {n_workers} parallel workers")
+    with Pool(n_workers) as pool:
+        data_list = pool.map(_compute_one_config, tasks)
 
     results = {
         'method': 'numerov_spin_half_extended',
@@ -355,82 +421,15 @@ def main():
         'A_values': [n[0] for n in nuclei],
         'energies': energies,
         'projectiles': projectiles,
-        'param_names': param_names_11,
+        'param_names': param_names_13,
         'theta_deg': theta_deg.tolist(),
         'observable_combinations': [
-            'elastic_9p', 'elastic_11p', 'elastic_Ay_11p',
-            'elastic_sigR_11p', 'elastic_Ay_sigR_11p', 'all_11p', 'all_9p',
+            'elastic_9p', 'elastic_11p', 'elastic_13p', 'elastic_Ay_13p',
+            'elastic_sigR_13p', 'elastic_Ay_sigR_13p', 'all_13p',
+            'all_11p', 'all_9p',
         ],
-        'data': [],
+        'data': data_list,
     }
-
-    total = len(nuclei) * len(energies) * len(projectiles)
-    count = 0
-
-    for proj in projectiles:
-        print(f"\n{'=' * 60}")
-        print(f"Projectile: {proj}")
-        print('=' * 60)
-
-        for A, Z, name in nuclei:
-            for E in energies:
-                count += 1
-                print(f"\n[{count}/{total}] {proj} + {name} @ {E} MeV")
-
-                try:
-                    params, rvso, avso = get_kd02_params_11(proj, A, Z, E)
-
-                    F, gradients, obs_0, n_data = compute_fisher_extended(
-                        proj, A, Z, E, theta_deg, params, rvso, avso
-                    )
-
-                    subsets = compute_deff_subsets(F, gradients, n_data, proj)
-
-                    entry = {
-                        'projectile': proj,
-                        'nucleus': name,
-                        'A': A,
-                        'Z': Z,
-                        'E': E,
-                        'params': params,
-                        'rvso': rvso,
-                        'avso': avso,
-                        'sigma_R': float(obs_0['sigma_R']),
-                        'fisher_matrix': F.tolist(),
-                        'deff_results': {},
-                    }
-
-                    if proj == 'n':
-                        entry['sigma_T'] = float(obs_0['sigma_T'])
-
-                    for key, val in subsets.items():
-                        entry['deff_results'][key] = {
-                            'D_eff': float(val['D_eff']),
-                            'condition_number': float(val['cond']),
-                            'eigenvalues': val['eigenvalues'],
-                        }
-
-                    results['data'].append(entry)
-
-                    # Print summary line
-                    d9 = subsets['elastic_9p']['D_eff']
-                    d11 = subsets['elastic_11p']['D_eff']
-                    d_ay = subsets['elastic_Ay_11p']['D_eff']
-                    d_all = subsets['all_11p']['D_eff']
-                    print(f"  elastic(9p)={d9:.2f}  elastic(11p)={d11:.2f}"
-                          f"  +Ay={d_ay:.2f}  all={d_all:.2f}"
-                          f"  sigma_R={obs_0['sigma_R']:.1f} mb")
-
-                except Exception as e:
-                    print(f"  ERROR: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    results['data'].append({
-                        'projectile': proj,
-                        'nucleus': name,
-                        'A': A, 'Z': Z, 'E': E,
-                        'error': str(e),
-                    })
 
     # Save main results
     outdir = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -447,14 +446,14 @@ def main():
         ('p', 40, 20, '40Ca', 50),
         ('n', 120, 50, '120Sn', 100),
     ]
-    grad_data = {'theta_deg': theta_deg.tolist(), 'param_names': param_names_11,
+    grad_data = {'theta_deg': theta_deg.tolist(), 'param_names': param_names_13,
                  'cases': []}
     for proj_r, A_r, Z_r, name_r, E_r in representative_cases:
         print(f"\nComputing gradients for {proj_r}+{name_r}@{E_r} MeV...")
         try:
-            params_r, rvso_r, avso_r = get_kd02_params_11(proj_r, A_r, Z_r, E_r)
+            params_r = get_kd02_params_13(proj_r, A_r, Z_r, E_r)
             F_r, grads_r, obs_r, nd_r = compute_fisher_extended(
-                proj_r, A_r, Z_r, E_r, theta_deg, params_r, rvso_r, avso_r)
+                proj_r, A_r, Z_r, E_r, theta_deg, params_r)
             grad_data['cases'].append({
                 'projectile': proj_r, 'nucleus': name_r,
                 'A': A_r, 'Z': Z_r, 'E': E_r,
@@ -477,8 +476,8 @@ def main():
 
     valid = [d for d in results['data'] if 'deff_results' in d]
 
-    for combo in ['elastic_9p', 'elastic_11p', 'elastic_Ay_11p',
-                   'elastic_Ay_sigR_11p', 'all_11p']:
+    for combo in ['elastic_9p', 'elastic_11p', 'elastic_13p',
+                   'elastic_Ay_13p', 'elastic_Ay_sigR_13p', 'all_13p']:
         deff_vals = [d['deff_results'][combo]['D_eff'] for d in valid
                      if combo in d['deff_results']]
         if deff_vals:

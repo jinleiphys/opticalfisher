@@ -18,25 +18,26 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from potentials import KD02Potential
-from deff_scan_extended import (compute_observables_vector, get_kd02_params_11,
-                                 kd02_potential_11params)
+from deff_scan_extended import (compute_observables_vector, get_kd02_params_13,
+                                 kd02_potential_13params)
 
-PARAM_NAMES = ['V', 'rv', 'av', 'W', 'rw', 'aw', 'Wd', 'rvd', 'avd', 'Vso', 'Wso']
+PARAM_NAMES = ['V', 'rv', 'av', 'W', 'rw', 'aw', 'Wd', 'rvd', 'avd',
+               'Vso', 'Wso', 'rvso', 'avso']
 
 
-def compute_elastic_fisher(proj, A, Z, E_lab, theta_deg, params, rvso, avso,
+def compute_elastic_fisher(proj, A, Z, E_lab, theta_deg, params,
                             eps_rel=0.01, l_max=30):
     """
-    Compute elastic-only 11x11 Fisher matrix using log-derivatives.
+    Compute elastic-only 13x13 Fisher matrix using log-derivatives.
 
     Returns:
-        F_elastic: (11, 11) Fisher matrix for elastic dσ/dΩ only
+        F_elastic: (13, 13) Fisher matrix for elastic dσ/dΩ only
     """
     n_params = len(params)
     n_angles = len(theta_deg)
 
     obs_0 = compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,
-                                        rvso, avso, l_max)
+                                        l_max)
     dcs_0 = obs_0['elastic_dcs']
 
     G_elastic = np.zeros((n_params, n_angles))
@@ -51,9 +52,9 @@ def compute_elastic_fisher(proj, A, Z, E_lab, theta_deg, params, rvso, avso,
         params_minus[i] -= delta
 
         obs_p = compute_observables_vector(proj, A, Z, E_lab, theta_deg,
-                                            params_plus, rvso, avso, l_max)
+                                            params_plus, l_max)
         obs_m = compute_observables_vector(proj, A, Z, E_lab, theta_deg,
-                                            params_minus, rvso, avso, l_max)
+                                            params_minus, l_max)
 
         # d log σ / d log p_i
         G_elastic[i] = params[i] * (obs_p['elastic_dcs'] - obs_m['elastic_dcs']) / (
@@ -91,11 +92,8 @@ def main():
         E = entry['E']
         nuc = entry['nucleus']
         params = entry['params']
-        rvso = entry['rvso']
-        avso = entry['avso']
 
-        F_el = compute_elastic_fisher(proj, A, Z, E, theta_deg, params,
-                                       rvso, avso)
+        F_el = compute_elastic_fisher(proj, A, Z, E, theta_deg, params)
 
         # D_eff
         ev = np.linalg.eigvalsh(F_el)

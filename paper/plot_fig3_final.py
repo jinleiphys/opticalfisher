@@ -53,28 +53,27 @@ def setup_style():
     })
 
 
-def compute_fisher_numerov(proj, A, Z, E_lab, param_names, n_params=11):
+def compute_fisher_numerov(proj, A, Z, E_lab, param_names, n_params=13):
     """
     Compute Fisher matrix and eigenvectors using Numerov solver.
 
     Returns F, eigenvalues (descending), eigenvectors, D_eff.
     """
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'analysis'))
-    from deff_scan_extended import (compute_fisher_extended, get_kd02_params_11)
+    from deff_scan_extended import (compute_fisher_extended, get_kd02_params_13)
 
     theta_deg = np.linspace(10, 170, 17)
-    params, rvso, avso = get_kd02_params_11(proj, A, Z, E_lab)
+    params = get_kd02_params_13(proj, A, Z, E_lab)
 
     if n_params == 9:
         # Use only central potential parameters
-        params_use = params[:9]
         F_full, gradients, obs_0, n_data = compute_fisher_extended(
-            proj, A, Z, E_lab, theta_deg, params, rvso, avso)
+            proj, A, Z, E_lab, theta_deg, params)
         # Extract 9x9 sub-block
         F = F_full[:9, :9]
     else:
         F, gradients, obs_0, n_data = compute_fisher_extended(
-            proj, A, Z, E_lab, theta_deg, params, rvso, avso)
+            proj, A, Z, E_lab, theta_deg, params)
 
     eigenvalues, eigenvectors = np.linalg.eigh(F)
     idx = np.argsort(eigenvalues)[::-1]
@@ -88,7 +87,7 @@ def compute_fisher_numerov(proj, A, Z, E_lab, param_names, n_params=11):
     return F, eigenvalues, eigenvectors, D_eff, params
 
 
-def load_elastic_fisher_from_gradients(grad_path, proj, nucleus, E, n_params=11):
+def load_elastic_fisher_from_gradients(grad_path, proj, nucleus, E, n_params=13):
     """
     Load gradient data and build elastic-only Fisher matrix.
 
@@ -149,14 +148,20 @@ def load_fisher_from_json(data_path, proj, nucleus, E):
 
 
 def plot_fig3(save_path, F=None, eigenvalues=None, eigenvectors=None,
-              D_eff=None, n_params=11):
+              D_eff=None, n_params=13):
     """
     PRL Figure 3: Eigenvector composition.
-    Extended to 11 parameters (with spin-orbit).
+    Extended to 13 parameters (with spin-orbit geometry).
     """
     setup_style()
 
-    if n_params == 11:
+    if n_params == 13:
+        param_names = ['$V$', '$r_v$', '$a_v$', '$W$', '$r_w$', '$a_w$',
+                        '$W_d$', '$r_d$', '$a_d$', '$V_{so}$', '$W_{so}$',
+                        '$r_{so}$', '$a_{so}$']
+        param_names_raw = ['V', 'rv', 'av', 'W', 'rw', 'aw',
+                           'Wd', 'rvd', 'avd', 'Vso', 'Wso', 'rvso', 'avso']
+    elif n_params == 11:
         param_names = ['$V$', '$r_v$', '$a_v$', '$W$', '$r_w$', '$a_w$',
                         '$W_d$', '$r_d$', '$a_d$', '$V_{so}$', '$W_{so}$']
         param_names_raw = ['V', 'rv', 'av', 'W', 'rw', 'aw',
@@ -199,10 +204,10 @@ def plot_fig3(save_path, F=None, eigenvalues=None, eigenvectors=None,
     # Background shading for parameter groups
     ax.axvspan(-0.5, 2.5, alpha=0.15, color=COLORS['mint'], zorder=0)
     ax.axvspan(2.5, 8.5, alpha=0.08, color=COLORS['lavender'], zorder=0)
-    if n_params == 11:
-        ax.axvspan(8.5, 10.5, alpha=0.10, color=COLORS['blush'], zorder=0)
+    if n_params >= 11:
+        ax.axvspan(8.5, n_params - 0.5, alpha=0.10, color=COLORS['blush'], zorder=0)
     ax.axvline(x=2.5, color=COLORS['gray'], linestyle='--', linewidth=1.5, alpha=0.7)
-    if n_params == 11:
+    if n_params >= 11:
         ax.axvline(x=8.5, color=COLORS['gray'], linestyle='--', linewidth=1.5, alpha=0.7)
 
     # Region labels
@@ -210,25 +215,17 @@ def plot_fig3(save_path, F=None, eigenvalues=None, eigenvectors=None,
             color=COLORS['dark_green'])
     ax.text(5.5, 95, 'Imaginary', ha='center', fontsize=16, fontweight='bold',
             color=COLORS['dark_purple'])
-    if n_params == 11:
-        ax.text(9.5, 95, 'Spin-Orbit', ha='center', fontsize=16, fontweight='bold',
+    if n_params >= 11:
+        so_center = (8.5 + n_params - 0.5) / 2
+        ax.text(so_center, 95, 'Spin-Orbit', ha='center', fontsize=16, fontweight='bold',
                 color=COLORS['dark_pink'])
 
-    # Physical interpretation labels
-    e1_dominant = param_names_raw[np.argmax(e1_contrib)]
-    e1_interp = "Potential Scale" if e1_dominant == 'V' else "Volume"
-    e2_dominant = param_names_raw[np.argmax(e2_contrib)]
-    e2_interp = "Surface" if 'd' in e2_dominant.lower() else "Volume Radius"
-
-    e1_label = f'$\\mathbf{{e}}_1$ ({fractions[0]:.0f}% info): {e1_interp}'
-    e2_label = f'$\\mathbf{{e}}_2$ ({fractions[1]:.0f}% info): {e2_interp}'
-
     bars1 = ax.bar(x - width/2, e1_contrib, width,
-                   label=e1_label,
+                   label='$\\mathbf{e}_1$',
                    color=COLORS['green'], alpha=0.9,
                    edgecolor=COLORS['dark_green'], linewidth=1.5)
     bars2 = ax.bar(x + width/2, e2_contrib, width,
-                   label=e2_label,
+                   label='$\\mathbf{e}_2$',
                    color=COLORS['pink'], alpha=0.9,
                    edgecolor=COLORS['dark_pink'], linewidth=1.5, hatch='//')
 
@@ -268,8 +265,8 @@ def main():
     grad_path = os.path.join(data_dir, 'deff_gradients_representative.json')
     ext_path = os.path.join(data_dir, 'deff_scan_extended.json')
 
-    # Use 11-parameter elastic-only Fisher (consistent with paper discussion)
-    n_params = 11
+    # Use 13-parameter elastic-only Fisher (consistent with paper discussion)
+    n_params = 13
 
     # Try loading elastic-only Fisher from gradient data (preferred)
     F, eigenvalues, eigenvectors, D_eff = load_elastic_fisher_from_gradients(
@@ -287,7 +284,7 @@ def main():
         else:
             print("Computing Fisher matrix with Numerov solver...")
             param_names_raw = ['V', 'rv', 'av', 'W', 'rw', 'aw',
-                               'Wd', 'rvd', 'avd', 'Vso', 'Wso']
+                               'Wd', 'rvd', 'avd', 'Vso', 'Wso', 'rvso', 'avso']
             F, eigenvalues, eigenvectors, D_eff, _ = compute_fisher_numerov(
                 'n', 40, 20, 50, param_names_raw, n_params)
 

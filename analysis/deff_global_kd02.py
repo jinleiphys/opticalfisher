@@ -33,27 +33,28 @@ from potentials import KD02Potential
 
 def get_kd02_universal_params():
     """
-    Return the 45 universal KD02 coefficients (names and nominal values).
+    Return the 48 universal KD02 coefficients (names and nominal values).
 
     These are the coefficients in the KD02 parametrization formulas that
     determine all local potential parameters for any (A, Z, E, proj).
+    Counted directly from Koning & Delaroche, NPA 713 (2003) 231:
+      Tables 10-11, Eqs. (25)-(26), (31)-(33), (36)-(37).
 
     Groups:
-        Shared geometry (6): rv, av, rvd geometry coefficients
-        Shared depth (16): v10, v1_iso, ..., wso2
-        Neutron-specific (10): ef_n, v2_n, v3_n, w1_n, avd_n
-        Proton-specific (13): ef_p, v2_p, v3_p, w1_p, avd_p, rc
-
-    Note: rvso and avso are excluded because the 11-param local Fisher
-    does not vary spin-orbit geometry.
+        Shared geometry (9): rv, av, rvd, rvso coefficients + aso [Eqs.25-26,31,36-37]
+        Shared depth (16): v10, v1_iso, ..., wso2 [Tables 10-11 shared entries]
+        Neutron-specific (10): ef_n, v2_n, v3_n, w1_n, avd_n [Table 10]
+        Proton-specific (13): ef_p, v2_p, v3_p, w1_p, avd_p, rc [Table 11]
     """
     names = [
-        # Shared geometry (6)
-        'rv0', 'rv1',       # rv = rv0 - rv1 * A^{-1/3}
-        'av0', 'av1',       # av = av0 - av1 * A
-        'rvd0', 'rvd1',     # rvd = rvd0 - rvd1 * A^{1/3}
+        # Shared geometry (9) — Eqs. (25), (26), (31), (36), (37)
+        'rv0', 'rv1',       # rv = rv0 - rv1 * A^{-1/3}  [Eq.(25)]
+        'av0', 'av1',       # av = av0 - av1 * A          [Eq.(26)]
+        'rvd0', 'rvd1',     # rvd = rvd0 - rvd1 * A^{1/3} [Eq.(31)]
+        'rvso0', 'rvso1',   # rvso = rvso0 - rvso1 * A^{-1/3} [Eq.(36)]
+        'aso',               # aso = 0.59 (constant, no A-dep) [Eq.(37)]
 
-        # Shared depth coefficients (16)
+        # Shared depth coefficients (16) — Tables 10-11
         'v10', 'v1_iso', 'v1_A',  # v1 = v10 ∓ v1_iso*(N-Z)/A - v1_A*A
         'v4',                       # cubic energy term
         'd10', 'd1_iso',           # d1 = d10 ∓ d1_iso*(N-Z)/A
@@ -85,6 +86,8 @@ def get_kd02_universal_params():
         1.3039, 0.4054,
         0.6778, 1.487e-4,
         1.3424, 0.01585,
+        1.1854, 0.647,       # rvso = 1.1854 - 0.647 * A^{-1/3}
+        0.59,                 # aso = 0.59 [Eq.(37)]
 
         # Shared depth
         59.30, 21.0, 0.024,
@@ -115,10 +118,10 @@ def get_kd02_universal_params():
 
     # Group indices for subgroup analysis
     groups = {
-        'Shared Geometry': list(range(0, 6)),
-        'Shared Depth': list(range(6, 22)),
-        'Neutron-specific': list(range(22, 32)),
-        'Proton-specific': list(range(32, 45)),
+        'Shared Geometry': list(range(0, 9)),
+        'Shared Depth': list(range(9, 25)),
+        'Neutron-specific': list(range(25, 35)),
+        'Proton-specific': list(range(35, 48)),
     }
 
     return names, np.array(values, dtype=float), groups
@@ -126,16 +129,16 @@ def get_kd02_universal_params():
 
 def universal_to_local(univ, A, Z, E, proj):
     """
-    Compute 11 local KD02 parameters from universal coefficients.
+    Compute 13 local KD02 parameters from universal coefficients.
 
     Args:
-        univ: array of 45 universal KD02 coefficients
+        univ: array of 48 universal KD02 coefficients
         A, Z: target nucleus
         E: lab energy (MeV)
         proj: 'n' or 'p'
 
     Returns:
-        local: array [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso]
+        local: array [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso]
     """
     N = A - Z
     A13 = A ** (1.0 / 3.0)
@@ -144,25 +147,28 @@ def universal_to_local(univ, A, Z, E, proj):
     rv0, rv1 = univ[0], univ[1]
     av0, av1 = univ[2], univ[3]
     rvd0, rvd1 = univ[4], univ[5]
+    rvso0, rvso1 = univ[6], univ[7]
+    avso = univ[8]  # aso = 0.59 [Eq.(37)]
 
     rv = rv0 - rv1 * A**(-1.0/3.0)
     av = av0 - av1 * A
     rvd = rvd0 - rvd1 * A13
+    rvso = rvso0 - rvso1 * A**(-1.0/3.0)
 
     # rw = rv, aw = av in KD02
     rw, aw = rv, av
 
     # --- Unpack shared depth ---
-    v10, v1_iso, v1_A = univ[6], univ[7], univ[8]
-    v4 = univ[9]
-    d10, d1_iso = univ[10], univ[11]
-    w20, w21 = univ[12], univ[13]
-    d20, d2_amp = univ[14], univ[15]
-    d3 = univ[16]
-    vso10, vso11 = univ[17], univ[18]
-    vso2 = univ[19]
-    wso1 = univ[20]
-    wso2 = univ[21]
+    v10, v1_iso, v1_A = univ[9], univ[10], univ[11]
+    v4 = univ[12]
+    d10, d1_iso = univ[13], univ[14]
+    w20, w21 = univ[15], univ[16]
+    d20, d2_amp = univ[17], univ[18]
+    d3 = univ[19]
+    vso10, vso11 = univ[20], univ[21]
+    vso2 = univ[22]
+    wso1 = univ[23]
+    wso2 = univ[24]
 
     w2 = w20 + w21 * A
     d2 = d20 + d2_amp / (1.0 + np.exp((A - 156.0) / 8.0))
@@ -170,11 +176,11 @@ def universal_to_local(univ, A, Z, E, proj):
 
     # --- Unpack nucleon-specific ---
     if proj == 'n':
-        ef0, ef1 = univ[22], univ[23]
-        v20, v21 = univ[24], univ[25]
-        v30, v31 = univ[26], univ[27]
-        w10, w11 = univ[28], univ[29]
-        avd0, avd1 = univ[30], univ[31]
+        ef0, ef1 = univ[25], univ[26]
+        v20, v21 = univ[27], univ[28]
+        v30, v31 = univ[29], univ[30]
+        w10, w11 = univ[31], univ[32]
+        avd0, avd1 = univ[33], univ[34]
 
         ef = ef0 + ef1 * A
         v1 = v10 - v1_iso * (N - Z) / A - v1_A * A
@@ -185,12 +191,12 @@ def universal_to_local(univ, A, Z, E, proj):
         avd = avd0 - avd1 * A
         vcoul = 0.0
     else:  # proton
-        ef0, ef1 = univ[32], univ[33]
-        v20, v21 = univ[34], univ[35]
-        v30, v31 = univ[36], univ[37]
-        w10, w11 = univ[38], univ[39]
-        avd0, avd1 = univ[40], univ[41]
-        rc0, rc1, rc2 = univ[42], univ[43], univ[44]
+        ef0, ef1 = univ[35], univ[36]
+        v20, v21 = univ[37], univ[38]
+        v30, v31 = univ[39], univ[40]
+        w10, w11 = univ[41], univ[42]
+        avd0, avd1 = univ[43], univ[44]
+        rc0, rc1, rc2 = univ[45], univ[46], univ[47]
 
         ef = ef0 + ef1 * A
         v1 = v10 + v1_iso * (N - Z) / A - v1_A * A
@@ -215,7 +221,7 @@ def universal_to_local(univ, A, Z, E, proj):
     Vso = vso1 * np.exp(-vso2 * f)
     Wso = wso1 * f**2 / (f**2 + wso2**2)
 
-    return np.array([V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso])
+    return np.array([V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso])
 
 
 def compute_log_jacobian(univ, A, Z, E, proj, eps_rel=1e-4):
@@ -232,12 +238,13 @@ def compute_log_jacobian(univ, A, Z, E, proj, eps_rel=1e-4):
         eps_rel: relative perturbation for finite differences
 
     Returns:
-        J: (11, N_univ) log-space Jacobian matrix
+        J: (13, N_univ) log-space Jacobian matrix
     """
     N_univ = len(univ)
     p0 = universal_to_local(univ, A, Z, E, proj)
 
-    J = np.zeros((11, N_univ))
+    N_local = len(p0)
+    J = np.zeros((N_local, N_univ))
 
     for k in range(N_univ):
         u_plus = univ.copy()
@@ -252,7 +259,7 @@ def compute_log_jacobian(univ, A, Z, E, proj, eps_rel=1e-4):
         dp_du = (p_plus - p_minus) / (2.0 * delta)
 
         # Log-Jacobian: J_ik = u_k/p_i * dp_i/du_k
-        for i in range(11):
+        for i in range(N_local):
             if abs(p0[i]) > 1e-30:
                 J[i, k] = univ[k] / p0[i] * dp_du[i]
 
@@ -279,7 +286,8 @@ def validate_jacobian(univ, A, Z, E, proj):
     p_ours = universal_to_local(univ, A, Z, E, proj)
     pot = KD02Potential(proj, A, Z, E)
     p_ref = np.array([pot.V, pot.rv, pot.av, pot.W, pot.rw, pot.aw,
-                       pot.Wd, pot.rvd, pot.avd, pot.Vso, pot.Wso])
+                       pot.Wd, pot.rvd, pot.avd, pot.Vso, pot.Wso,
+                       pot.rvso, pot.avso])
     diff = np.abs(p_ours - p_ref)
     return diff, p_ours, p_ref
 
@@ -473,9 +481,9 @@ def main():
     # --- Comparison: D_eff/N_params for local vs global ---
     print(f"\n  Summary comparison:")
     # Average local D_eff (single system, 11 params)
-    local_deffs = [e['deff_results']['all_11p']['D_eff'] for e in entries]
-    print(f"    Local (11 params): mean D_eff = {np.mean(local_deffs):.2f} / 11"
-          f" = {np.mean(local_deffs)/11*100:.0f}%")
+    local_deffs = [e['deff_results']['all_13p']['D_eff'] for e in entries]
+    print(f"    Local (13 params): mean D_eff = {np.mean(local_deffs):.2f} / 13"
+          f" = {np.mean(local_deffs)/13:.0%}")
     print(f"    Global ({N_univ} params): D_eff = {D_full:.2f} / {N_univ}"
           f" = {D_full/N_univ*100:.0f}%")
 

@@ -3,7 +3,7 @@
 PRL Figure: Global KD02 Fisher Information Analysis
 
 Three-panel figure showing the constraints from a worldwide dataset on
-the 45 universal KD02 parameters:
+the 48 universal KD02 parameters:
 
   (a) D_eff growth as (nucleus, projectile) systems are accumulated.
   (b) Eigenvalue spectrum of the global Fisher matrix with cumulative
@@ -66,12 +66,12 @@ def setup_style():
     """Set up matplotlib style for double-column PRL figure."""
     plt.rcParams.update({
         'font.family': 'serif',
-        'font.size': 9,
+        'font.size': 10,
         'axes.linewidth': 0.8,
         'axes.labelsize': 10,
         'axes.titlesize': 10,
-        'xtick.labelsize': 8,
-        'ytick.labelsize': 8,
+        'xtick.labelsize': 9,
+        'ytick.labelsize': 9,
         'xtick.major.width': 0.6,
         'ytick.major.width': 0.6,
         'xtick.minor.width': 0.4,
@@ -80,7 +80,7 @@ def setup_style():
         'ytick.major.size': 3,
         'xtick.minor.size': 1.5,
         'ytick.minor.size': 1.5,
-        'legend.fontsize': 7.5,
+        'legend.fontsize': 9,
         'legend.framealpha': 0.85,
         'figure.dpi': 150,
         'savefig.dpi': 300,
@@ -107,7 +107,7 @@ def panel_a_growth(ax, data):
     n_nuclei = [g['n_nuclei'] for g in growth]
     deff_vals = [g['D_eff'] for g in growth]
 
-    N_params = data['N_universal_params']  # 45
+    N_params = data['N_universal_params']  # 48
 
     # Identify neutron vs proton boundary
     n_neutron = sum(1 for g in growth if g['last_added'].startswith('n+'))
@@ -131,7 +131,7 @@ def panel_a_growth(ax, data):
                linewidth=0.8, alpha=0.7)
     ax.annotate(f'$D_{{\\mathrm{{eff}}}} \\approx {final_deff:.0f}$',
                 xy=(18, final_deff), xytext=(18, 2.85),
-                fontsize=8, color=COLORS['dark_purple'], fontweight='bold',
+                fontsize=9, color=COLORS['dark_purple'], fontweight='bold',
                 ha='center', va='bottom',
                 arrowprops=dict(arrowstyle='->', color=COLORS['dark_purple'],
                                 lw=0.7, shrinkA=0, shrinkB=2))
@@ -139,7 +139,7 @@ def panel_a_growth(ax, data):
     # N_param annotation
     ax.text(0.97, 0.95,
             f'$N_{{\\mathrm{{param}}}} = {N_params}$',
-            transform=ax.transAxes, ha='right', va='top', fontsize=7,
+            transform=ax.transAxes, ha='right', va='top', fontsize=9,
             color=COLORS['gray'],
             bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
                       edgecolor=COLORS['light_gray'], alpha=0.9))
@@ -156,10 +156,10 @@ def panel_a_growth(ax, data):
 
     # Region labels
     ax.text(n_neutron / 2 + 0.5, 0.22, 'neutrons only',
-            ha='center', va='bottom', fontsize=7, color=COLORS['dark_green'],
+            ha='center', va='bottom', fontsize=9, color=COLORS['dark_green'],
             fontstyle='italic', alpha=0.8)
     ax.text(n_neutron + (24 - n_neutron) / 2 + 0.5, 0.22, '+ protons',
-            ha='center', va='bottom', fontsize=7, color=COLORS['dark_pink'],
+            ha='center', va='bottom', fontsize=9, color=COLORS['dark_pink'],
             fontstyle='italic', alpha=0.8)
 
     ax.set_xlabel('Number of (nucleus, projectile) systems')
@@ -168,7 +168,7 @@ def panel_a_growth(ax, data):
                  loc='left')
     ax.set_xlim(0.3, 25.0)
     ax.set_ylim(0, 3.5)
-    ax.legend(loc='upper right', frameon=True, edgecolor=COLORS['light_gray'])
+    ax.legend(loc='lower right', frameon=True, edgecolor=COLORS['light_gray'])
     ax.grid(True, alpha=0.15, linewidth=0.5)
 
 
@@ -213,9 +213,9 @@ def panel_b_eigenvalues(ax, data):
     ax2 = ax.twinx()
     ax2.plot(indices, cumulative, 'k-', linewidth=1.0, alpha=0.7, zorder=4)
     ax2.plot(indices, cumulative, 'ko', markersize=1.5, alpha=0.5, zorder=4)
-    ax2.set_ylabel('Cumulative information (%)', fontsize=9)
+    ax2.set_ylabel('Cumulative information (%)', fontsize=10)
     ax2.set_ylim(0, 105)
-    ax2.tick_params(axis='y', labelsize=8)
+    ax2.tick_params(axis='y', labelsize=9)
 
     # Mark where 90% and 99% of information is reached
     for threshold, ls, y_offset in [(90, '--', -10), (99, ':', -8)]:
@@ -227,15 +227,15 @@ def panel_b_eigenvalues(ax, data):
             ax2.annotate(f'{threshold}% ({idx_th + 1} modes)',
                          xy=(idx_th + 1, threshold),
                          xytext=(text_x, threshold + y_offset),
-                         fontsize=6, color=COLORS['gray'], ha='left',
+                         fontsize=8, color=COLORS['gray'], ha='left',
                          arrowprops=dict(arrowstyle='->', color=COLORS['gray'],
                                          lw=0.5))
 
     # Dynamic range annotation
     dyn_range = eigenvalues[0] / eigenvalues[-1]
     ax.text(0.97, 0.50,
-            f'$\\lambda_1/\\lambda_{{45}}$\n$= {dyn_range:.0e}$',
-            transform=ax.transAxes, ha='right', va='center', fontsize=6.5,
+            f'$\\lambda_1/\\lambda_{{{N}}}$\n$= {dyn_range:.0e}$',
+            transform=ax.transAxes, ha='right', va='center', fontsize=8,
             bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
                       edgecolor=COLORS['light_gray'], alpha=0.9))
 
@@ -252,12 +252,12 @@ def panel_b_eigenvalues(ax, data):
                label='7--15'),
         Line2D([0], [0], marker='s', color='w',
                markerfacecolor=COLORS['light_gray'], markersize=5,
-               label='16--45 (sloppy)'),
+               label=f'16--{N} (sloppy)'),
         Line2D([0], [0], color='k', linewidth=0.8,
                label='Cumulative'),
     ]
-    ax.legend(handles=legend_elements, loc='center right', frameon=True,
-              edgecolor=COLORS['light_gray'], fontsize=6.5)
+    ax.legend(handles=legend_elements, loc='lower right', frameon=True,
+              edgecolor=COLORS['light_gray'], fontsize=8)
 
     ax.grid(True, alpha=0.15, which='major', linewidth=0.5)
 
@@ -324,12 +324,36 @@ def panel_c_eigenvectors(ax, data):
         y_labels.append(f'$\\mathbf{{e}}_{{{i+1}}}$ ({fractions[i]:.0f}%)')
 
     ax.set_yticks(np.arange(n_evecs))
-    ax.set_yticklabels(y_labels, fontsize=7.5)
+    ax.set_yticklabels(y_labels, fontsize=9)
 
-    # X-axis: parameter names
-    reordered_names = [param_names[i] for i in ordered_indices]
+    # X-axis: parameter names with LaTeX formatting
+    PARAM_LATEX = {
+        'rv0': r'$r_{v0}$', 'rv1': r'$r_{v1}$',
+        'av0': r'$a_{v0}$', 'av1': r'$a_{v1}$',
+        'rvd0': r'$r_{d0}$', 'rvd1': r'$r_{d1}$',
+        'v10': r'$v_1$', 'v1_iso': r'$v_1^{iso}$',
+        'v1_A': r'$v_1^A$', 'v4': r'$v_4$',
+        'd10': r'$d_1$', 'd1_iso': r'$d_1^{iso}$',
+        'w20': r'$w_2$', 'w21': r'$w_{21}$',
+        'd20': r'$d_2$', 'd2_amp': r'$d_2^a$', 'd3': r'$d_3$',
+        'vso10': r'$v_{so1}$', 'vso11': r'$v_{so2}$', 'vso2': r'$v_{so3}$',
+        'wso1': r'$w_{so1}$', 'wso2': r'$w_{so2}$',
+        'ef_n0': r'$\epsilon_n$', 'ef_n1': r'$\epsilon_{n1}$',
+        'v2_n0': r'$v_2^n$', 'v2_n1': r'$v_{2n1}$',
+        'v3_n0': r'$v_3^n$', 'v3_n1': r'$v_{3n1}$',
+        'w1_n0': r'$w_1^n$', 'w1_n1': r'$w_{1n1}$',
+        'avd_n0': r'$a_d^n$', 'avd_n1': r'$a_{dn1}$',
+        'ef_p0': r'$\epsilon_p$', 'ef_p1': r'$\epsilon_{p1}$',
+        'v2_p0': r'$v_2^p$', 'v2_p1': r'$v_{2p1}$',
+        'v3_p0': r'$v_3^p$', 'v3_p1': r'$v_{3p1}$',
+        'w1_p0': r'$w_1^p$', 'w1_p1': r'$w_{1p1}$',
+        'avd_p0': r'$a_d^p$', 'avd_p1': r'$a_{dp1}$',
+        'rc0': r'$r_{c0}$', 'rc1': r'$r_{c1}$', 'rc2': r'$r_{c2}$',
+    }
+    reordered_names = [PARAM_LATEX.get(param_names[i], param_names[i])
+                       for i in ordered_indices]
     ax.set_xticks(np.arange(N_cols))
-    ax.set_xticklabels(reordered_names, rotation=90, fontsize=5.5,
+    ax.set_xticklabels(reordered_names, rotation=90, fontsize=9,
                        ha='center')
 
     # Group boundary lines
@@ -344,7 +368,7 @@ def panel_c_eigenvectors(ax, data):
         ax.annotate(gname,
                     xy=(mid, 0), xycoords=('data', 'axes fraction'),
                     xytext=(mid, 1.04), textcoords=('data', 'axes fraction'),
-                    ha='center', va='bottom', fontsize=6,
+                    ha='center', va='bottom', fontsize=8,
                     color=GROUP_COLORS[gname], fontweight='bold',
                     annotation_clip=False)
         # Colored bracket above heatmap
@@ -359,17 +383,16 @@ def panel_c_eigenvectors(ax, data):
 
     # Colorbar
     cbar = plt.colorbar(im, ax=ax, fraction=0.02, pad=0.015, aspect=20)
-    cbar.set_label('Normalized component', fontsize=7)
-    cbar.ax.tick_params(labelsize=6)
+    cbar.set_label('Normalized component', fontsize=9)
+    cbar.ax.tick_params(labelsize=8)
 
     # Annotate dominant components
     for i in range(n_evecs):
         for j in range(N_cols):
             val = evec_matrix[i, j]
             if abs(val) > 0.5:
-                text_color = 'white' if abs(val) > 0.75 else 'black'
                 ax.text(j, i, f'{val:.1f}', ha='center', va='center',
-                        fontsize=4.5, color=text_color, fontweight='bold')
+                        fontsize=6, color='black', fontweight='bold')
 
 
 def plot_fig_global(data, save_path):
@@ -382,7 +405,7 @@ def plot_fig_global(data, save_path):
     """
     setup_style()
 
-    fig = plt.figure(figsize=(7.0, 7.0))
+    fig = plt.figure(figsize=(7.0, 8.0))
 
     gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.05],
                           hspace=0.50, wspace=0.55,

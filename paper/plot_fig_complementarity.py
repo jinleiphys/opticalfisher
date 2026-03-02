@@ -64,9 +64,11 @@ def plot_fig_complementarity(ext_data, multi_data, save_path):
     combos = [
         ('elastic_9p', r'$d\sigma/d\Omega$ (9p)'),
         ('elastic_11p', r'$d\sigma/d\Omega$ (11p)'),
-        ('elastic_Ay_11p', r'$d\sigma/d\Omega$ + $A_y$'),
-        ('elastic_sigR_11p', r'$d\sigma/d\Omega$ + $\sigma_R$'),
-        ('elastic_Ay_sigR_11p', r'$d\sigma/d\Omega$ + $A_y$ + $\sigma_R$'),
+        ('elastic_13p', r'$d\sigma/d\Omega$ (13p)'),
+        ('elastic_Ay_13p', r'$d\sigma/d\Omega$ + $A_y$'),
+        ('elastic_sigR_13p', r'$d\sigma/d\Omega$ + $\sigma_R$'),
+        ('elastic_Ay_sigR_13p', r'$d\sigma/d\Omega$ + $A_y$ + $\sigma_R$'),
+        ('all_13p', r'All obs. (13p)'),
         ('all_11p', r'All obs. (11p)'),
         ('all_9p', r'All obs. (9p)'),
     ]
@@ -88,10 +90,12 @@ def plot_fig_complementarity(ext_data, multi_data, save_path):
     bar_colors = [
         COLORS['green'],     # elastic 9p
         '#A3E4BC',           # elastic 11p
+        '#7BD4A0',           # elastic 13p
         COLORS['pink'],      # +Ay
         COLORS['lavender'],  # +sigR
         COLORS['purple'],    # +Ay+sigR
-        COLORS['dark_purple'],  # all 11p
+        COLORS['dark_purple'],  # all 13p
+        '#8B5CF6',           # all 11p
         COLORS['dark_green'],   # all 9p
     ][:len(means)]
 

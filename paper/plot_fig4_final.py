@@ -63,12 +63,12 @@ def plot_fig4(ext_data, sens_data, save_path):
     # === (a) D_eff Distribution ===
     ax1 = axes[0]
 
-    # Collect D_eff values from extended scan (all_11p)
+    # Collect D_eff values from extended scan (all_13p)
     all_deff = []
     if ext_data:
         for item in ext_data.get('data', []):
-            if 'deff_results' in item and 'all_11p' in item['deff_results']:
-                all_deff.append(item['deff_results']['all_11p']['D_eff'])
+            if 'deff_results' in item and 'all_13p' in item['deff_results']:
+                all_deff.append(item['deff_results']['all_13p']['D_eff'])
 
     # Also show elastic_9p for comparison
     elastic_9p_deff = []

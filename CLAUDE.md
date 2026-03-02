@@ -8,7 +8,7 @@ Nuclear physics research computing the **effective dimensionality (D_eff)** of o
 
 **Strategy: Numerov method exclusively.** All computation uses the Numerov solver with finite-difference gradients, validated against FRESCO. Neural network scripts are historical artifacts only.
 
-The code supports both **spin-0** (9-param, central only) and **spin-1/2** (11-param, with spin-orbit coupling) scattering, including analyzing power Ay, reaction cross section σ_R, and total cross section σ_T.
+The code supports both **spin-0** (9-param, central only) and **spin-1/2** (13-param, with spin-orbit coupling including SO geometry) scattering, including analyzing power Ay, reaction cross section σ_R, and total cross section σ_T.
 
 ## Setup & Compilation
 
@@ -30,7 +30,7 @@ python analysis/deff_kd02_9params.py
 python analysis/deff_scan_kd02_9params_log.py    # spin-0, 9 params (log-derivatives)
 python analysis/deff_scan_kd02_9params.py         # spin-0, absolute derivatives version
 
-# Extended scan: spin-1/2, 11 params, multiple observables (dσ/dΩ, Ay, σ_R, σ_T)
+# Extended scan: spin-1/2, 13 params, multiple observables (dσ/dΩ, Ay, σ_R, σ_T)
 python analysis/deff_scan_extended.py             # ← RECOMMENDED for referee response
 
 # Multi-energy combined Fisher analysis (post-processing)
@@ -58,7 +58,7 @@ python paper/plot_fig_sensitivity.py      # Angle-resolved sensitivity
 ```
 KD02Potential (src/potentials.py)
   → 9-param central potential U(r) = V(r) + iW(r)            [spin-0]
-  → 11-param potential U(r,l,j) = central + spin-orbit        [spin-1/2]
+  → 13-param potential U(r,l,j) = central + spin-orbit        [spin-1/2]
     → ScatteringSolverFortran (src/scattering_fortran.py)
       → solve():          Numerov per l, returns S_l           [spin-0]
       → solve_spin_half(): Numerov per (l,j), returns S_{l,j}  [spin-1/2]
@@ -92,13 +92,13 @@ params = [V, rv, av, W, rw, aw, Wd, rvd, avd]
 ```
 V=real volume depth (MeV), rv/av=radius/diffuseness (fm), W=imaginary volume, Wd=imaginary surface.
 
-### 11-Parameter Model (KD02, spin-1/2)
+### 13-Parameter Model (KD02, spin-1/2)
 
 ```python
-params = [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso]
-#  indices: 0   1   2   3   4   5   6    7    8    9    10
+params = [V, rv, av, W, rw, aw, Wd, rvd, avd, Vso, Wso, rvso, avso]
+#  indices: 0   1   2   3   4   5   6    7    8    9    10    11    12
 ```
-Extends 9-param with Vso (real spin-orbit depth) and Wso (imaginary spin-orbit depth). Spin-orbit geometry (rvso, avso) fixed at KD02 values. Thomas form with factor of 2 (l·σ = 2 l·s convention).
+Extends 9-param with Vso (real spin-orbit depth), Wso (imaginary spin-orbit depth), and spin-orbit geometry rvso, avso. Thomas form with factor of 2 (l·σ = 2 l·s convention).
 
 ### Physical Constants (consistent across all files)
 

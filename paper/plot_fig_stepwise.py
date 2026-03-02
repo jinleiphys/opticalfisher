@@ -38,7 +38,7 @@ COLORS = {
     'gray': '#6B6B6B',
 }
 
-STEP_COLORS = ['#198754', '#2ECC71', '#D63384', '#6F42C1', '#E67E22']
+STEP_COLORS = ['#198754', '#82E0AA', '#D63384', '#C8A2C8', '#B8860B']
 STEP_LABELS_SHORT = [
     r'$d\sigma/d\Omega$',
     r'+ $\sigma_R$',
@@ -60,13 +60,13 @@ GROUP_COLORS = {
 def setup_style():
     plt.rcParams.update({
         'font.family': 'serif',
-        'font.size': 18,
-        'axes.linewidth': 1.5,
-        'axes.labelsize': 20,
-        'axes.titlesize': 20,
-        'xtick.labelsize': 16,
-        'ytick.labelsize': 16,
-        'legend.fontsize': 14,
+        'font.size': 8,
+        'axes.linewidth': 0.8,
+        'axes.labelsize': 9,
+        'axes.titlesize': 9,
+        'xtick.labelsize': 8,
+        'ytick.labelsize': 8,
+        'legend.fontsize': 7,
         'figure.dpi': 150,
         'savefig.dpi': 300,
         'savefig.bbox': 'tight',
@@ -79,7 +79,7 @@ def plot_stepwise(data, save_path, case_idx=0):
     Panel (b): Eigenvalue spectrum at each step (log scale)
     """
     setup_style()
-    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+    fig, axes = plt.subplots(2, 1, figsize=(3.4, 5.5))
 
     case = data['cases'][case_idx]
     proj = case['projectile']
@@ -100,7 +100,7 @@ def plot_stepwise(data, save_path, case_idx=0):
         step_labels.append(s['label'].split('(')[0].strip())
         step_deffs.append(s['D_eff'])
         step_eigenvals.append(np.array(s['eigenvalues']))
-        step_n_params.append(s.get('N_global_params', 11))
+        step_n_params.append(s.get('N_global_params', 13))
 
     n_steps = len(step_labels)
 
@@ -114,45 +114,40 @@ def plot_stepwise(data, save_path, case_idx=0):
 
     # Value labels on bars
     for i, (d, n_p) in enumerate(zip(step_deffs, step_n_params)):
-        ax1.text(i, d + 0.15, f'{d:.2f}', ha='center', va='bottom',
-                 fontsize=18, fontweight='bold')
-        if n_p != 11:
-            ax1.text(i, d + 0.45, f'({n_p}p)', ha='center', va='bottom',
-                     fontsize=12, color=COLORS['gray'])
-
-    # Arrows showing increments
-    for i in range(1, n_steps):
-        delta = step_deffs[i] - step_deffs[i-1]
-        if delta > 0.05:
-            mid_y = (step_deffs[i-1] + step_deffs[i]) / 2
-            ax1.annotate('', xy=(i, step_deffs[i] - 0.05),
-                         xytext=(i-0.6, step_deffs[i-1] + 0.05),
-                         arrowprops=dict(arrowstyle='->', color=COLORS['gray'],
-                                         lw=1.5, connectionstyle='arc3,rad=0.2'))
-            ax1.text(i - 0.35, mid_y, f'+{delta:.2f}', fontsize=12,
-                     color=COLORS['gray'], ha='center', rotation=45)
+        label_y = d + 0.06
+        ax1.text(i, label_y, f'{d:.2f}', ha='center', va='bottom',
+                 fontsize=7, fontweight='bold')
+        if n_p != 13:
+            ax1.text(i, label_y + 0.22, f'({n_p}p)', ha='center', va='bottom',
+                     fontsize=6, color=COLORS['gray'])
 
     ax1.set_xticks(x)
-    ax1.set_xticklabels(STEP_LABELS_SHORT[:n_steps], fontsize=14)
+    ax1.set_xticklabels(STEP_LABELS_SHORT[:n_steps])
     ax1.set_ylabel('$D_\\mathrm{eff}$')
-    ax1.set_title(f'(a) Progressive Constraints: {proj}+{nuc}', pad=10)
-    ax1.set_ylim(0, max(step_deffs) + 1.2)
+    ax1.set_ylim(0, max(step_deffs) + 0.8)
     ax1.grid(True, alpha=0.3, axis='y')
 
     # Reference lines
     ax1.axhline(1, color=COLORS['gray'], linestyle=':', linewidth=1, alpha=0.5)
     ax1.axhline(2, color=COLORS['gray'], linestyle=':', linewidth=1, alpha=0.5)
 
+    # Panel label in top-right
+    ax1.text(0.95, 0.95, '(a)', transform=ax1.transAxes, fontsize=10,
+             fontweight='bold', va='top', ha='right')
+
     # === Panel (b): Eigenvalue spectrum ===
     ax2 = axes[1]
 
+    markers = ['o', 's', '^', 'D', 'v']
+    linestyles = ['-', '--', '-', '-', '-']
     for i, (ev, label) in enumerate(zip(step_eigenvals, STEP_LABELS_SHORT)):
         ev_sorted = np.sort(ev)[::-1]
         # Normalize by max eigenvalue for comparison
         ev_norm = ev_sorted / (ev_sorted[0] + 1e-30)
         n_ev = len(ev_sorted)
-        ax2.semilogy(range(1, n_ev + 1), ev_norm, 'o-',
-                     color=STEP_COLORS[i], linewidth=2, markersize=6,
+        ax2.semilogy(range(1, n_ev + 1), ev_norm,
+                     marker=markers[i], linestyle=linestyles[i],
+                     color=STEP_COLORS[i], linewidth=1.5, markersize=4,
                      label=f'{label} ($D_{{eff}}$={step_deffs[i]:.1f})')
 
     # Mark the "threshold" for 1% of max
@@ -160,12 +155,15 @@ def plot_stepwise(data, save_path, case_idx=0):
                 label='1% threshold')
 
     ax2.set_xlabel('Eigenvalue Index')
-    ax2.set_ylabel('Normalized Eigenvalue $\\lambda_i / \\lambda_1$')
-    ax2.set_title('(b) Eigenvalue Spectrum', pad=10)
-    ax2.legend(loc='lower left', fontsize=12, framealpha=0.9)
+    ax2.set_ylabel('$\\lambda_i / \\lambda_1$')
+    ax2.legend(loc='lower right', fontsize=6.5, framealpha=0.9)
     ax2.set_xlim(0.5, 17.5)
     ax2.set_ylim(1e-10, 5)
     ax2.grid(True, alpha=0.3)
+
+    # Panel label in top-right
+    ax2.text(0.95, 0.95, '(b)', transform=ax2.transAxes, fontsize=10,
+             fontweight='bold', va='top', ha='right')
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
