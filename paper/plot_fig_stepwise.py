@@ -87,7 +87,7 @@ def plot_stepwise(data, save_path, case_idx=0):
     steps = case['steps']
 
     step_keys = ['1_elastic', '2_elastic_sigR', '3_all_single_E',
-                 '4_multi_energy', '5_kd02_global']
+                 '4_multi_energy']
     step_labels = []
     step_deffs = []
     step_eigenvals = []

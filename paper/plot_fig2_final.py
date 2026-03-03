@@ -85,7 +85,7 @@ def plot_fig2(data, save_path):
     ax1.set_ylabel('$D_{eff}$')
     ax1.set_title('(a) $D_{eff}$ vs Mass ($E$=50 MeV)', pad=15)
     ax1.set_ylim(0, 2.5)
-    ax1.legend(loc='upper left', fontsize=16)
+    ax1.legend(loc='upper right', fontsize=16)
     ax1.grid(True, alpha=0.3, axis='y')
 
     # === (b) D_eff vs Energy ===
@@ -124,7 +124,7 @@ def plot_fig2(data, save_path):
     ax3.set_xlabel('Target Nucleus')
     ax3.set_ylabel('$\\log_{10}$(Condition Number)')
     ax3.set_title('(c) Inverse Problem Ill-posedness', pad=15)
-    ax3.legend(loc='upper left', fontsize=16)
+    ax3.legend(loc='upper right', fontsize=16)
     ax3.grid(True, alpha=0.3, axis='y')
 
     plt.tight_layout()
