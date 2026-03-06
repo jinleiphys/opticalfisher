@@ -62,7 +62,7 @@ def compute_fisher_numerov(proj, A, Z, E_lab, param_names, n_params=13):
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'analysis'))
     from deff_scan_extended import (compute_fisher_extended, get_kd02_params_13)
 
-    theta_deg = np.linspace(10, 170, 17)
+    theta_deg = np.linspace(5, 175, 35)
     params = get_kd02_params_13(proj, A, Z, E_lab)
 
     if n_params == 9:

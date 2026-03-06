@@ -144,8 +144,12 @@ def plot_stepwise(data, save_path, case_idx=0):
         ev_sorted = np.sort(ev)[::-1]
         # Normalize by max eigenvalue for comparison
         ev_norm = ev_sorted / (ev_sorted[0] + 1e-30)
-        n_ev = len(ev_sorted)
-        ax2.semilogy(range(1, n_ev + 1), ev_norm,
+        # For Jacobian-projected steps, remove near-zero eigenvalues
+        # (rw=rv, aw=av constraints reduce rank from 13 to 11)
+        mask = ev_norm > 1e-10
+        ev_plot = ev_norm[mask]
+        n_ev = len(ev_plot)
+        ax2.semilogy(range(1, n_ev + 1), ev_plot,
                      marker=markers[i], linestyle=linestyles[i],
                      color=STEP_COLORS[i], linewidth=1.5, markersize=4,
                      label=f'{label} ($D_{{eff}}$={step_deffs[i]:.1f})')
@@ -157,8 +161,8 @@ def plot_stepwise(data, save_path, case_idx=0):
     ax2.set_xlabel('Eigenvalue Index')
     ax2.set_ylabel('$\\lambda_i / \\lambda_1$')
     ax2.legend(loc='lower left', fontsize=6.5, framealpha=0.9)
-    ax2.set_xlim(0.5, 14.5)
-    ax2.set_ylim(1e-10, 5)
+    ax2.set_xlim(0.5, 13.5)
+    ax2.set_ylim(1e-8, 5)
     ax2.grid(True, alpha=0.3)
 
     # Panel label in top-right

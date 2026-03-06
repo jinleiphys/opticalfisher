@@ -1,0 +1,28 @@
+
+**Dear Editors,**
+
+Please find enclosed the revised manuscript entitled **“Intrinsic Information Limit in Nuclear Optical Potential Extraction”** by **Jin Lei**, submitted for consideration as a **Letter in Physical Review Letters**.
+
+This revised version was substantially strengthened in response to the referee’s central criticism that the original analysis was limited to single-energy elastic angular distributions. The manuscript has now been expanded into a step-by-step multi-observable and multi-energy study within the Koning-Delaroche (KD02) optical-model framework. In particular, the revised work now includes:
+(i) spin-1/2 optical potentials with spin-orbit terms,
+(ii) analyzing power (A_y), reaction cross sections (\sigma_R), and total cross sections (\sigma_T),
+(iii) a Jacobian-based multi-energy Fisher analysis across 7 energies from 10 to 200 MeV, and
+(iv) a global information analysis in the full 48-dimensional KD02 universal coefficient space. These additions directly address the referee’s request for a broader and more physically complete test of the information bottleneck.  
+
+The central conclusion remains intact after these extensions: within the KD02 framework, nucleon-nucleus scattering constrains far fewer independent parameter combinations than the nominal parameter count would suggest. Single-energy elastic scattering constrains only about (D_{\mathrm{eff}}\approx 1.8\pm0.5) parameter combinations on average; systematic multi-energy fitting raises this only to about (D_{\mathrm{eff}}\sim 2.4) in the 13-parameter local space, while the full global KD02 analysis yields (D_{\mathrm{eff}}\approx 3.0) out of 48 universal coefficients. In other words, the revised manuscript shows that the long-known Igo ambiguity can be reformulated quantitatively as a structural information limit rather than merely a practical fitting difficulty. 
+
+I believe the work is appropriate for **PRL** for three reasons.
+
+First, it gives a quantitative answer to a longstanding and broadly relevant inverse-problem question in nuclear reaction theory: how many independent combinations of optical-model parameters are actually constrained by scattering data. Rather than treating the Igo ambiguity only qualitatively, the manuscript expresses it in terms of an effective dimensionality derived from the Fisher information spectrum. 
+
+Second, the revised manuscript goes beyond identifying the bottleneck and shows how different classes of measurements contribute to lifting it. The step-by-step decomposition reveals a clear hierarchy: systematic multi-energy information provides the largest gain, analyzing powers provide the next-largest gain through orthogonal spin-orbit sensitivity, and integrated cross sections alone add little within the present normalization and weighting scheme. This gives experimentally actionable guidance for future nucleon-nucleus scattering programs, especially where beam time is limited.  
+
+Third, although the calculations are performed within the KD02 optical-model framework, the physical message is broader: the work places nuclear optical-potential extraction in the language of information geometry and sloppy models, linking a classic nuclear-physics ambiguity to a general class of high-dimensional inverse problems. In this sense, I believe the manuscript will be of interest not only to nuclear reaction theorists, but also to readers concerned with parameter identifiability, model sloppiness, and information limits in complex physical systems. 
+
+I hope that the revised manuscript, together with the detailed response to the referee, will merit favorable consideration for publication in **Physical Review Letters**.
+
+Thank you for your time and consideration.
+
+**Sincerely,**
+**Jin Lei**
+

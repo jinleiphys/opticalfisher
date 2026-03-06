@@ -3,11 +3,14 @@
 Multi-energy combined Fisher information analysis.
 
 Post-processing script: reads deff_scan_extended.json and combines
-Fisher matrices across energies for each (nucleus, projectile):
-    F_combined = sum_E F(E)
+Fisher matrices across energies for each (nucleus, projectile) using
+the proper Jacobian projection through the KD02 universal coefficient space:
 
-Computes D_eff(single-E) vs D_eff(multi-E combined) and shows how
-D_eff grows with number of energies.
+    F_univ = sum_E J(E)^T F_local(E) J(E)     (48x48, universal space)
+    F_ref  = J(E_ref) F_univ J(E_ref)^T        (13x13, local space at E_ref)
+
+This correctly accounts for the KD02 energy dependence that ties local
+parameters across energies. Also computes the naive direct sum for comparison.
 
 Author: Jin Lei
 Date: February 2026
@@ -17,6 +20,14 @@ import numpy as np
 import json
 import os
 import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+# Import Jacobian machinery from the global analysis script
+from deff_global_kd02 import (
+    get_kd02_universal_params,
+    compute_log_jacobian,
+)
 
 
 def compute_deff(F):
@@ -32,22 +43,10 @@ def compute_deff(F):
     return D_eff, np.sort(eigenvalues)[::-1], cond
 
 
-def combine_fisher_matrices(data_entries):
-    """Sum Fisher matrices from a list of scan entries."""
-    F_combined = None
-    for entry in data_entries:
-        if 'fisher_matrix' not in entry:
-            continue
-        F = np.array(entry['fisher_matrix'])
-        if F_combined is None:
-            F_combined = np.zeros_like(F)
-        F_combined += F
-    return F_combined
-
-
 def main():
     print("=" * 70)
     print("Multi-Energy Combined Fisher Information Analysis")
+    print("(Jacobian projection through KD02 universal coefficient space)")
     print("=" * 70)
 
     base_dir = os.path.dirname(__file__)
@@ -65,6 +64,12 @@ def main():
 
     energies = sorted(scan_data['energies'])
     param_names = scan_data['param_names']
+    N_local = len(param_names)
+
+    # Load universal KD02 parameters
+    univ_names, univ_values, groups = get_kd02_universal_params()
+    N_univ = len(univ_values)
+    print(f"Universal KD02 parameters: {N_univ}")
 
     # Build index: (projectile, nucleus) -> {E: entry}
     index = {}
@@ -74,34 +79,58 @@ def main():
             index[key] = {}
         index[key][entry['E']] = entry
 
+    # Reference energy for back-projection
+    E_ref = 50.0
+
     results = {
         'param_names': param_names,
         'energies': energies,
+        'E_ref': E_ref,
+        'N_universal': N_univ,
+        'method': 'Jacobian projection: F_univ = sum_E J(E)^T F(E) J(E), '
+                  'F_ref = J(E_ref) F_univ J(E_ref)^T',
         'combinations': [],
     }
 
-    print(f"\n{'System':20s} {'single-E avg':>12s} {'7-E combined':>12s} "
-          f"{'ratio':>8s}  D_eff(N=1..7)")
-    print("-" * 90)
+    print(f"\nReference energy for back-projection: {E_ref} MeV")
+    print(f"\n{'System':20s} {'single-E avg':>12s} {'Jacobian':>10s} "
+          f"{'direct sum':>10s}  D_eff(N=1..7) [Jacobian]")
+    print("-" * 100)
 
     for (proj, nuc), e_dict in sorted(index.items()):
         avail_E = sorted([E for E in e_dict.keys() if E in energies])
         if len(avail_E) < 2:
             continue
 
-        # Single-energy D_eff values (from full 11x11 Fisher)
+        A = e_dict[avail_E[0]]['A']
+        Z = e_dict[avail_E[0]]['Z']
+
+        # Single-energy D_eff values
         single_deffs = []
         for E in avail_E:
             F_single = np.array(e_dict[E]['fisher_matrix'])
             D_single, _, _ = compute_deff(F_single)
             single_deffs.append(D_single)
 
-        # Multi-energy combined D_eff: accumulate F matrices
+        # --- Jacobian-based multi-energy combination ---
+        # Compute J(E_ref) for back-projection
+        J_ref = compute_log_jacobian(univ_values, A, Z, E_ref, proj)
+
+        # Accumulate F_univ = sum_E J(E)^T F(E) J(E)
         deff_vs_N = []
-        F_accum = np.zeros((len(param_names), len(param_names)))
+        F_univ_accum = np.zeros((N_univ, N_univ))
+
         for i, E in enumerate(avail_E):
-            F_accum += np.array(e_dict[E]['fisher_matrix'])
-            D_N, ev_N, cond_N = compute_deff(F_accum)
+            F_local_E = np.array(e_dict[E]['fisher_matrix'])
+            J_E = compute_log_jacobian(univ_values, A, Z, E, proj)
+
+            # Project to universal space
+            F_univ_accum += J_E.T @ F_local_E @ J_E
+
+            # Project back to local space at E_ref
+            F_ref = J_ref @ F_univ_accum @ J_ref.T
+            D_N, ev_N, cond_N = compute_deff(F_ref)
+
             deff_vs_N.append({
                 'N_energies': i + 1,
                 'energies_included': avail_E[:i+1],
@@ -110,26 +139,44 @@ def main():
                 'eigenvalues': ev_N.tolist(),
             })
 
-        # Full combination
-        D_full = deff_vs_N[-1]['D_eff']
+        # --- Naive direct sum for comparison ---
+        F_direct = np.zeros((N_local, N_local))
+        deff_direct_vs_N = []
+        for i, E in enumerate(avail_E):
+            F_direct += np.array(e_dict[E]['fisher_matrix'])
+            D_dir, _, _ = compute_deff(F_direct)
+            deff_direct_vs_N.append({
+                'N_energies': i + 1,
+                'D_eff_direct': float(D_dir),
+            })
+
+        # Full combination results
+        D_jacobian = deff_vs_N[-1]['D_eff']
+        D_direct = deff_direct_vs_N[-1]['D_eff_direct']
         D_single_avg = np.mean(single_deffs)
+
+        # Back-projected Fisher matrix at E_ref (full 7-energy)
+        F_ref_full = J_ref @ F_univ_accum @ J_ref.T
 
         combo = {
             'projectile': proj,
             'nucleus': nuc,
-            'A': e_dict[avail_E[0]]['A'],
-            'Z': e_dict[avail_E[0]]['Z'],
+            'A': A,
+            'Z': Z,
             'single_energy_deffs': {str(E): float(d)
                                      for E, d in zip(avail_E, single_deffs)},
             'single_energy_mean': float(D_single_avg),
-            'multi_energy_deff': deff_vs_N,
-            'full_combined_fisher': F_accum.tolist(),
+            'multi_energy_jacobian': deff_vs_N,
+            'multi_energy_direct': deff_direct_vs_N,
+            'D_eff_jacobian': float(D_jacobian),
+            'D_eff_direct': float(D_direct),
+            'full_combined_fisher': F_ref_full.tolist(),
         }
         results['combinations'].append(combo)
 
         deff_str = " ".join([f"{d['D_eff']:.2f}" for d in deff_vs_N])
-        print(f"{proj}+{nuc:6s}          {D_single_avg:8.2f}     {D_full:8.2f}"
-              f"    {D_full/D_single_avg:5.2f}x  [{deff_str}]")
+        print(f"{proj}+{nuc:6s}          {D_single_avg:8.2f}   {D_jacobian:8.2f}"
+              f"   {D_direct:8.2f}   [{deff_str}]")
 
     # Summary statistics
     print("\n" + "=" * 70)
@@ -137,23 +184,30 @@ def main():
     print("=" * 70)
 
     all_single = []
-    all_combined = []
+    all_jacobian = []
+    all_direct = []
     for combo in results['combinations']:
         all_single.append(combo['single_energy_mean'])
-        all_combined.append(combo['multi_energy_deff'][-1]['D_eff'])
+        all_jacobian.append(combo['D_eff_jacobian'])
+        all_direct.append(combo['D_eff_direct'])
 
     if all_single:
-        print(f"  Single-energy D_eff (avg):  {np.mean(all_single):.2f} "
+        print(f"  Single-energy D_eff (avg):     {np.mean(all_single):.2f} "
               f"+/- {np.std(all_single):.2f}")
-        print(f"  7-energy combined D_eff:    {np.mean(all_combined):.2f} "
-              f"+/- {np.std(all_combined):.2f}")
-        print(f"  Improvement factor:         {np.mean(all_combined)/np.mean(all_single):.2f}x")
+        print(f"  7-energy Jacobian D_eff (avg): {np.mean(all_jacobian):.2f} "
+              f"+/- {np.std(all_jacobian):.2f}")
+        print(f"  7-energy direct sum (avg):     {np.mean(all_direct):.2f} "
+              f"+/- {np.std(all_direct):.2f}")
+        print(f"\n  Jacobian improvement factor:   "
+              f"{np.mean(all_jacobian)/np.mean(all_single):.2f}x")
+        print(f"  Direct sum improvement factor: "
+              f"{np.mean(all_direct)/np.mean(all_single):.2f}x")
 
-    # Also compute observable-specific multi-energy combinations
-    # For this we need individual observable subsets, which requires re-computation
-    # Instead, just note the all_11p D_eff from the full Fisher
-    print("\n  Note: The full Fisher matrix includes all observables (dcs+Ay+sigma_R+sigma_T).")
-    print("  For elastic-only multi-energy, re-run with subset gradients.")
+    print(f"\n  Method: Jacobian projection through {N_univ}-dim KD02 "
+          f"universal coefficient space,")
+    print(f"  back-projected to 13-dim local space at E_ref = {E_ref} MeV.")
+    print(f"  Direct sum shown for comparison (assumes energy-independent "
+          f"local parameters).")
 
     # Save
     outdir = os.path.join(base_dir, '..', 'data')
