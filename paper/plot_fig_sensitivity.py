@@ -98,37 +98,38 @@ def plot_fig_sensitivity(data, save_path, case_idx=0):
     nuc = case['nucleus']
     E = case['E']
 
-    # === Panel (a): Raw derivatives on log scale — Igo degeneracy ===
+    # === Panel (a): Normalized sensitivity directions — collinearity determines D_eff ===
     ax1 = axes[0]
-
-    # Convert log-sensitivities S_i to raw derivatives: dsigma/dp_i = S_i * sigma / p_i
-    sigma = np.array(case['elastic_dcs'])
-    params_val = np.array(case['params'])
 
     idx_V = param_names.index('V')
     idx_rv = param_names.index('rv')
-    idx_Wd = param_names.index('Wd')
+    idx_av = param_names.index('av')
 
-    raw_V = np.abs(S_dcs[idx_V] * sigma / params_val[idx_V])
-    raw_rv = np.abs(S_dcs[idx_rv] * sigma / params_val[idx_rv])
-    raw_Wd = np.abs(S_dcs[idx_Wd] * sigma / params_val[idx_Wd])
+    # Normalize each sensitivity vector to unit norm: S_i(theta) / ||S_i||
+    S_V_raw = S_dcs[idx_V]
+    S_rv_raw = S_dcs[idx_rv]
+    S_av_raw = S_dcs[idx_av]
 
-    # Plot raw derivatives on log scale
-    ax1.semilogy(theta, raw_V, '-', color=COLORS['dark_green'], marker='o',
-                 linewidth=1.5, markersize=3, markevery=4,
-                 label=r'$|\partial\sigma/\partial V|$')
-    ax1.semilogy(theta, raw_rv, '--', color=COLORS['dark_pink'], marker='s',
-                 linewidth=1.5, markersize=3, markevery=4,
-                 label=r'$|\partial\sigma/\partial r_v|$')
-    ax1.semilogy(theta, raw_Wd, ':', color='#C8A2C8', marker='D',
-                 linewidth=1.5, markersize=3, markevery=4,
-                 label=r'$|\partial\sigma/\partial W_d|$')
+    S_V_norm = S_V_raw / np.linalg.norm(S_V_raw)
+    S_rv_norm = S_rv_raw / np.linalg.norm(S_rv_raw)
+    S_av_norm = S_av_raw / np.linalg.norm(S_av_raw)
+
+    # Plot normalized sensitivities (linear scale — overlap = collinear = degenerate)
+    ax1.plot(theta, S_V_norm, '-', color=COLORS['dark_green'], marker='o',
+             linewidth=1.5, markersize=3, markevery=4,
+             label=r'$\hat{S}_V$')
+    ax1.plot(theta, S_rv_norm, '--', color=COLORS['dark_pink'], marker='s',
+             linewidth=1.5, markersize=3, markevery=4,
+             label=r'$\hat{S}_{r_v}$')
+    ax1.plot(theta, S_av_norm, ':', color='#C8A2C8', marker='D',
+             linewidth=1.5, markersize=3, markevery=4,
+             label=r'$\hat{S}_{a_v}$')
 
     ax1.set_xlabel(r'Scattering Angle $\theta$ (deg)')
-    ax1.set_ylabel(r'$|\partial(d\sigma/d\Omega)/\partial p_i|$')
+    ax1.set_ylabel(r'$S_i(\theta)\, /\, \|\mathbf{S}_i\|$')
     ax1.set_xlim(5, 175)
-    ax1.legend(loc='upper right', fontsize=6.5, framealpha=0.9,
-               handlelength=2.0)
+    ax1.legend(loc='upper center', fontsize=6.5, framealpha=0.9,
+               handlelength=2.0, ncol=3)
     ax1.grid(True, alpha=0.3)
     ax1.text(0.05, 0.95, '(a)', transform=ax1.transAxes, fontsize=10,
              fontweight='bold', va='top', ha='left')

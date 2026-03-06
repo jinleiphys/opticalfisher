@@ -156,8 +156,8 @@ def plot_stepwise(data, save_path, case_idx=0):
 
     ax2.set_xlabel('Eigenvalue Index')
     ax2.set_ylabel('$\\lambda_i / \\lambda_1$')
-    ax2.legend(loc='lower right', fontsize=6.5, framealpha=0.9)
-    ax2.set_xlim(0.5, 17.5)
+    ax2.legend(loc='lower left', fontsize=6.5, framealpha=0.9)
+    ax2.set_xlim(0.5, 14.5)
     ax2.set_ylim(1e-10, 5)
     ax2.grid(True, alpha=0.3)
 

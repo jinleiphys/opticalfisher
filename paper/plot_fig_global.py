@@ -130,9 +130,9 @@ def panel_a_growth(ax, data):
     ax.axhline(y=final_deff, color=COLORS['dark_purple'], linestyle='--',
                linewidth=0.8, alpha=0.7)
     ax.annotate(f'$D_{{\\mathrm{{eff}}}} \\approx {final_deff:.0f}$',
-                xy=(18, final_deff), xytext=(18, 2.85),
+                xy=(18, final_deff), xytext=(18, 2.55),
                 fontsize=9, color=COLORS['dark_purple'], fontweight='bold',
-                ha='center', va='bottom',
+                ha='center', va='top',
                 arrowprops=dict(arrowstyle='->', color=COLORS['dark_purple'],
                                 lw=0.7, shrinkA=0, shrinkB=2))
 
@@ -168,7 +168,7 @@ def panel_a_growth(ax, data):
                  loc='left')
     ax.set_xlim(0.3, 25.0)
     ax.set_ylim(0, 3.5)
-    ax.legend(loc='lower right', frameon=True, edgecolor=COLORS['light_gray'])
+    ax.legend(loc='center left', frameon=True, edgecolor=COLORS['light_gray'])
     ax.grid(True, alpha=0.15, linewidth=0.5)
 
 
@@ -331,6 +331,8 @@ def panel_c_eigenvectors(ax, data):
         'rv0': r'$r_{v0}$', 'rv1': r'$r_{v1}$',
         'av0': r'$a_{v0}$', 'av1': r'$a_{v1}$',
         'rvd0': r'$r_{d0}$', 'rvd1': r'$r_{d1}$',
+        'rvso0': r'$r_{so,0}$', 'rvso1': r'$r_{so,1}$',
+        'aso': r'$a_{so}$',
         'v10': r'$v_1$', 'v1_iso': r'$v_1^{iso}$',
         'v1_A': r'$v_1^A$', 'v4': r'$v_4$',
         'd10': r'$d_1$', 'd1_iso': r'$d_1^{iso}$',
