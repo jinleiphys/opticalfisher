@@ -79,7 +79,7 @@ The two approaches are complementary: Fisher efficiently maps global constraint 
 
 1. *It answers a decades-old open question quantitatively.* The Igo ambiguity has been known since 1958, but has never been characterized beyond qualitative statements ("the potential is only sensitive near the surface"). This work provides the first number: $D_\mathrm{eff} \approx 1.8$ out of 13, verified across 168 configurations spanning the nuclear chart. This transforms a qualitative observation into a precise, universal, and falsifiable statement.
 
-2. *It establishes a fundamental no-go result.* The scale-invariance of $D_\mathrm{eff}$ proves that the information limit cannot be overcome by improving experimental precision alone, only by qualitatively different measurements. This is a statement about the physics of scattering, not a limitation of any particular experiment or analysis method.
+2. *It establishes a fundamental no-go result.* The scale-invariance of $D_\mathrm{eff}$ proves that uniform error reduction cannot change the geometric anisotropy of the constraint structure: the ratio of uncertainties along stiff and sloppy directions is fixed regardless of overall precision. Breaking the bottleneck requires qualitatively different measurements, not simply better statistics.
 
 3. *It provides the theoretical foundation for a PRL result.* King *et al.* [PRL **122**, 232502 (2019)] empirically observed that only $V$ and $r_v$ are correlated in Bayesian posteriors. The present work explains *why*: the FIM eigenvalue hierarchy predicts exactly this correlation structure from first principles, and the $\sim$3700-fold computational speedup enables the systematic survey that MCMC cannot.
 
