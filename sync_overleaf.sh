@@ -15,8 +15,15 @@ TEX_SRC="$REPO_ROOT/paper"
 
 echo "Syncing paper to Overleaf..."
 
-# Clone if not exists, otherwise pull
-if [ ! -d "$OVERLEAF_DIR/.git" ]; then
+# Clone if absent. A stale /tmp directory may still contain a partial .git
+# directory after cleanup, so validate the repository instead of checking only
+# for the directory name.
+if ! git -C "$OVERLEAF_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    if [ -e "$OVERLEAF_DIR" ]; then
+        INVALID_DIR="${OVERLEAF_DIR}.invalid.$(date '+%Y%m%d-%H%M%S')"
+        echo "Invalid Overleaf clone found; preserving it at $INVALID_DIR"
+        mv "$OVERLEAF_DIR" "$INVALID_DIR"
+    fi
     echo "Cloning Overleaf repo..."
     git clone "$OVERLEAF_URL" "$OVERLEAF_DIR"
 fi
