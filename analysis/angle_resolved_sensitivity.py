@@ -104,6 +104,43 @@ def cumulative_fisher_info(S_dcs, theta_dense):
     return C_i, D_eff_cumul
 
 
+def angular_split_diagnostics(S_dcs, theta_dense, split_angle=100.0,
+                              idx_V=0, idx_rv=1, idx_av=2):
+    """Quantify the forward/backward collinearity used in the reply."""
+    theta_dense = np.asarray(theta_dense)
+    forward = theta_dense < split_angle
+    backward = theta_dense >= split_angle
+
+    def deff(mask):
+        fisher = S_dcs[:, mask] @ S_dcs[:, mask].T
+        eigenvalues = np.linalg.eigvalsh(fisher)
+        eigenvalues = eigenvalues[eigenvalues > 1e-20]
+        return float(eigenvalues.sum()**2 / np.sum(eigenvalues**2))
+
+    basis = np.column_stack((S_dcs[idx_V, backward],
+                             S_dcs[idx_rv, backward]))
+    q, _ = np.linalg.qr(basis)
+    sensitivity_av = S_dcs[idx_av, backward]
+    projection = q @ (q.T @ sensitivity_av)
+    remainder = sensitivity_av - projection
+
+    fisher_backward = S_dcs[:, backward] @ S_dcs[:, backward].T
+    lambda1_backward = np.linalg.eigvalsh(fisher_backward)[-1]
+
+    return {
+        'split_angle_deg': float(split_angle),
+        'rv_rms_forward': float(np.sqrt(np.mean(S_dcs[idx_rv, forward]**2))),
+        'rv_rms_backward': float(np.sqrt(np.mean(S_dcs[idx_rv, backward]**2))),
+        'av_projection_fraction_V_rv': float(
+            np.dot(projection, projection) / np.dot(sensitivity_av, sensitivity_av)),
+        'av_orthogonal_info_over_lambda1_backward': float(
+            np.dot(remainder, remainder) / lambda1_backward),
+        'deff_forward': deff(forward),
+        'deff_backward': deff(backward),
+        'deff_full': deff(np.ones_like(theta_dense, dtype=bool)),
+    }
+
+
 def main():
     print("=" * 70)
     print("Angle-Resolved Sensitivity Analysis")
@@ -136,6 +173,7 @@ def main():
             proj, A, Z, E, theta_dense, params)
 
         C_i, D_eff_cumul = cumulative_fisher_info(S_dcs, theta_dense)
+        split_diagnostics = angular_split_diagnostics(S_dcs, theta_dense)
 
         case_result = {
             'projectile': proj,
@@ -146,6 +184,7 @@ def main():
             'S_Ay': S_Ay.tolist(),
             'cumulative_info': C_i.tolist(),
             'D_eff_cumulative': D_eff_cumul.tolist(),
+            'angular_split_diagnostics': split_diagnostics,
             'elastic_dcs': obs_0['elastic_dcs'].tolist(),
             'Ay': obs_0['Ay'].tolist(),
             'sigma_R': float(obs_0['sigma_R']),
@@ -159,6 +198,12 @@ def main():
             print(f"  {pname:4s}: RMS={rms:.3f}  max at {max_angle:.0f} deg")
 
         print(f"  D_eff(all angles) = {D_eff_cumul[-1]:.2f}")
+        print("  Angular split diagnostics: "
+              f"projection={split_diagnostics['av_projection_fraction_V_rv']:.4f}, "
+              f"orthogonal/lambda1={split_diagnostics['av_orthogonal_info_over_lambda1_backward']:.4e}, "
+              f"D_eff(fwd,bwd,all)=({split_diagnostics['deff_forward']:.3f}, "
+              f"{split_diagnostics['deff_backward']:.3f}, "
+              f"{split_diagnostics['deff_full']:.3f})")
         # Find angle where D_eff reaches 90% of final value
         target = 0.9 * D_eff_cumul[-1]
         idx90 = np.searchsorted(D_eff_cumul, target)
