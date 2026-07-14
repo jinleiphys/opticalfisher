@@ -1,6 +1,6 @@
 # Appeal on Manuscript LM20073
 
-*"Structural information limit in nuclear optical potential extraction", J. Lei (sole author). Addressed to the Editors of Physical Review Letters.*
+*"Intrinsic information limit in nuclear optical potential extraction", J. Lei (sole author). Addressed to the Editors of Physical Review Letters.*
 
 I ask the Editors to reconsider the decision on LM20073 through the formal appeal procedure. A detailed point-by-point response accompanies this letter; here I summarize the grounds for reconsideration.
 

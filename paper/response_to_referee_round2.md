@@ -1,6 +1,6 @@
 # Response to the Second Report of Referee A and the Report of Referee B: LM20073
 
-*Manuscript: "Structural information limit in nuclear optical potential extraction" (J. Lei, sole author).*
+*Manuscript: "Intrinsic information limit in nuclear optical potential extraction" (J. Lei, sole author).*
 
 I thank both Referees for their careful reading. Referee A's second report raises one technical question about the treatment of forward- and backward-angle data in the relative error model; answering it uncovered a wording error in the End Matter, which I have corrected, and I am grateful for the catch. Referee B raises one conceptual concern (whether the optical potential belongs to the sloppy-model class) and one physics concern (that radii, diffuseness, and depths are constrained by established physical understanding), together with a recommendation about venue. I address each point below. Figure and section numbers refer to the revised manuscript.
 
