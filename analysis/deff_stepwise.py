@@ -56,7 +56,7 @@ def compute_deff(F):
 
 
 def compute_gradients_all(proj, A, Z, E_lab, theta_deg, params,
-                           eps_rel=0.01, l_max=30, delta_Ay=0.03):
+                           eps_rel=0.01, l_max=None, delta_Ay=0.03):
     """
     Compute gradient matrices for each observable separately.
 
@@ -126,7 +126,7 @@ def subgroup_info(F, indices):
     return {'trace': float(tr), 'D_eff': float(deff), 'eigenvalues': ev.tolist()}
 
 
-def stepwise_analysis(proj, A, Z, name, energies, theta_deg, l_max=30):
+def stepwise_analysis(proj, A, Z, name, energies, theta_deg, l_max=None):
     """
     Full step-by-step analysis for one nucleus.
 

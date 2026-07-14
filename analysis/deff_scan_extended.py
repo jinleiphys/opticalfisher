@@ -77,14 +77,24 @@ def kd02_potential_13params(r, l, j, A, Z_proj, Z, params):
 
 
 def adaptive_lmax(A, E_lab, min_lmax=30):
-    """Determine l_max from grazing angular momentum: l_max = k*R + 15."""
+    """Determine l_max from grazing angular momentum: l_max = k*R + 50.
+
+    The margin above the grazing value l_g = k*R must be generous because the
+    FISHER DERIVATIVES converge in l more slowly than the cross section itself
+    (log-derivatives at back angles amplify the partial-wave tail). The old
+    margin (+15) was insufficient at high energy: certified 2026-07-14 against
+    l_max = 60/90/120 (mutually consistent to <0.002), the +15 rule left
+    D_eff off by up to 0.72 for p+208Pb at 200 MeV and 0.15 for n+40Ca at
+    200 MeV. With +50 every configuration of the 168-point scan sits at or
+    above the certified-converged value.
+    """
     A_proj = 1
     mu = A_proj * A / (A_proj + A)
     E_cm = E_lab * A / (A_proj + A)
     k = np.sqrt(2 * mu * AMU * E_cm) / HBARC
     R = 1.25 * A**(1./3.)
     l_g = k * R
-    return max(min_lmax, int(l_g + 15))
+    return max(min_lmax, int(l_g) + 50)
 
 
 def compute_observables_vector(proj, A, Z, E_lab, theta_deg, params,

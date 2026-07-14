@@ -28,7 +28,7 @@ from deff_scan_extended import (kd02_potential_13params, compute_observables_vec
 
 
 def compute_angle_sensitivity(proj, A, Z, E_lab, theta_dense, params,
-                               eps_rel=0.01, l_max=30):
+                               eps_rel=0.01, l_max=None):
     """
     Compute S_i(theta) = d log sigma / d log p_i for each parameter.
 
