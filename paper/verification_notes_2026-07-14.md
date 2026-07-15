@@ -181,8 +181,29 @@ lmax cert 0.01133) EXCEPT two isolated drifts, both fixed this pass:
   clause, so endpoints stay 1.15/1.72 and gains stay raw-rounded 0.31/0.56 with no
   apparent conflict. Response letter quotes no A_y-gain number, so no letter edit.
 
-main_v3.tex recompiles clean (11 pp). No other main-text number moved. If the
-appeal package is re-declared, these two last-digit corrections join response row 5.
+main_v3.tex recompiles clean (11 pp). No other main-text number moved. DONE
+2026-07-15: both corrections are now declared in response row 5 (final xhigh
+Codex validation, finding 10). Same pass: l_max = kR+50 rule + 0.012
+certification bound now documented in the End Matter numerical-method paragraph
+(finding 6), and the AI-disclosure verification wording sharpened in all three
+documents (finding 8: "separate numerical cross-checks", numerical outputs vs
+text revisions verified by distinct means).
+
+## 3c. Round-2 decision archived; quote fidelity closed (2026-07-15)
+
+The full round-2 decision email (reject; Senior Associate Editor Kevin Dusling;
+transfer offers to PRResearch [editors consulted, regular article] and APS Open
+Science) plus both referee reports are archived VERBATIM at
+paper/referee_report_round2.md. All referee quotes used in appeal.md and
+response_to_referee_round2.md were checked against this archive: every one is
+verbatim, including Referee B's "constraint by" typo preserved in the response
+blockquote. This closes the single unverifiable item from the 2026-07-15 Codex
+letter audit (AXIS 1a). Referee A's full sentence context: "comprehensive and
+quite convincing (except for one point I raise below)" and "the main
+degeneracies ... are not necessarily new, but the work effectively packages
+them into a compact quantitative metric D_eff"; the appeal addresses the "one
+point" immediately after quoting and claims novelty only for the metric/map/
+hierarchy, so usage is fair. Do not escalate novelty claims in future letters.
 
 ## 4. Changelog discipline
 
