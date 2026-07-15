@@ -146,6 +146,44 @@ ranges and "no more than" bounds must bracket the raw artifact values.
   regenerated from converged data and synced to paper/ and paper/figures/;
   Figs. 3 and 6 (both n+40Ca@50) unchanged.
 
+## 3b. Independent from-scratch re-audit, 2026-07-15 (code <-> paper strict identity)
+
+Full re-derivation of every load-bearing number in main_v3.tex directly from the
+committed artifacts (scratchpad verify_paper.py), plus a formula-by-formula read
+of src/{observables,potentials,scattering_fortran}.py and all analysis scripts.
+Formulas: ALL match the manuscript (dsigma/dOmega=|f|^2+|g|^2; Ay=2Im(fg*)/(...);
+sigma_R, sigma_T optical-theorem neutron-only; log-derivative S_i; F=G G^T;
+Thomas factor 2; delta=0.01|p|; 35 angles; D_eff=(sum l)^2/sum l^2; Step-4
+Jacobian projection; 48-coeff universal grouping 9/16/10/13; pinv back-projection).
+Numbers: all reproduce (headline 1.59/1.73/1.66; steps 1.222/1.533/2.467/2.159 Ca,
+1.154/1.719/2.185/2.271 Sn; multi-E gains 1.2448/1.0312; global 2.936/e1-e2-e3;
+angle 5.73/16.52/96.0%/2.0e-3/1.19-1.20-1.22; pinv 2.899 vs 2.340, 23/24;
+lmax cert 0.01133) EXCEPT two isolated drifts, both fixed this pass:
+
+- **Line 71 condition-number range**: text said "$10^6$--$10^{11}$" for Fig.2(c),
+  but Fig.2(c) is n+A@50 across nuclei with true max 7.56e10 (=10^10.88, worst
+  = 12C); never reaches 10^11. Both the Fig.2 caption AND response letter already
+  said "to above $10^{10}$" -> line 71 was the lone outlier. FIXED to
+  "$10^6$ to above $10^{10}$" (matches caption line 76 + response letter).
+- **Line 128 Sn A_y gain**: text said "0.57"; committed deff_stepwise.json gives
+  the Sn single-energy A_y gain rounding to **0.56** under every definition
+  (Step3-Step1 = 0.564738, Step3-Step2 = 0.564263, elastic_Ay_13p - elastic_13p
+  = 0.564716; all -> 0.56, none -> 0.57). The round-4 note's raw "0.5651" was
+  superseded by the converged artifact. FIXED to "0.56". (Ca gain 0.3102 -> 0.31
+  unchanged.)
+- **Line 128 rounding-optics (Codex 2026-07-15 point d)**: Step-3 quotes the Sn
+  endpoints as 1.15 and 1.72 (each raw-rounded; locked as "showcase unchanged" in
+  response row 5), whose naive 2-dp difference 0.57 collides with the corrected
+  gain 0.56. This is rounding non-additivity (raw 1.7188886 - 1.1541509 =
+  0.5647377 -> 0.56), NOT a numerical error, and the multi-E gains 1.24/1.03 are
+  likewise raw differences (not 2.47-1.22=1.25). Resolved by appending "all
+  computed from the unrounded single-energy D_eff values" to the Discussion gain
+  clause, so endpoints stay 1.15/1.72 and gains stay raw-rounded 0.31/0.56 with no
+  apparent conflict. Response letter quotes no A_y-gain number, so no letter edit.
+
+main_v3.tex recompiles clean (11 pp). No other main-text number moved. If the
+appeal package is re-declared, these two last-digit corrections join response row 5.
+
 ## 4. Changelog discipline
 
 All post-round-2 changes declared in response Summary rows 1-6, including the
