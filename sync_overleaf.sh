@@ -41,7 +41,7 @@ find "$OVERLEAF_DIR" -maxdepth 1 -mindepth 1 -not -name '.git' -exec rm -rf {} +
 # 1. LaTeX, bib, bst, sty files
 echo "Copying LaTeX files..."
 shopt -s nullglob
-for f in "$TEX_SRC"/*.tex "$TEX_SRC"/*.bib "$TEX_SRC"/*.bst "$TEX_SRC"/*.sty; do
+for f in "$TEX_SRC"/*.tex "$TEX_SRC"/*.bib "$TEX_SRC"/*.bst "$TEX_SRC"/*.sty "$TEX_SRC"/*.txt; do
     [ -f "$f" ] && cp "$f" "$OVERLEAF_DIR/"
 done
 
