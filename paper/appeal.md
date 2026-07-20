@@ -1,8 +1,16 @@
-Request for Reconsideration of Manuscript LM20073
+Jin Lei
+School of Physics Science and Engineering, Tongji University, Shanghai 200092, China
 
-"Intrinsic information limit in nuclear optical potential extraction", J. Lei (sole author). Addressed to the Editors of Physical Review Letters.
+July 20, 2026
 
-I ask the Editors to reconsider the decision on LM20073; a detailed point-by-point response accompanies this letter. The second-round decision was reached while Referee A's single technical question was still awaiting an answer; the resubmitted manuscript answers it quantitatively, without changing the underlying logarithmic-sensitivity analysis, and makes the scope amendments Referee B requested.
+The Editors
+Physical Review Letters
+
+Re: Request for reconsideration of manuscript LM20073, "Intrinsic information limit in nuclear optical potential extraction", J. Lei (sole author)
+
+Dear Editors,
+
+I write to request reconsideration of the decision on manuscript LM20073; a detailed point-by-point response accompanies this letter. The second-round decision was reached while Referee A's single technical question was still awaiting an answer; the resubmitted manuscript answers it quantitatively, without changing the underlying logarithmic-sensitivity analysis, and makes the scope amendments Referee B requested.
 
 The disagreement between the two reports concerns venue, and the publication history of this problem bears on it directly. The discrete optical-potential ambiguity was reported in this journal, in its first volume [G. Igo, Phys. Rev. Lett. 1, 72 (1958)]. The statistical framework that explains it, the sloppy-model universality class, was established in this journal [J. J. Waterfall et al., Phys. Rev. Lett. 97, 150601 (2006)]. The modern empirical evidence, strongly non-Gaussian optical-potential posteriors and the depth-radius correlation, appeared in this journal [G. B. King et al., Phys. Rev. Lett. 122, 232502 (2019)]. The studies that followed in Physical Review C ask a different question, how best to constrain the potential of a given system through choices of experimental conditions and statistical protocol [M. Catacora-Rios et al., Phys. Rev. C 100, 064615 (2019); Phys. Rev. C 104, 064611 (2021)].
 
@@ -15,3 +23,9 @@ The central conclusion is unchanged, but the numerical record was corrected. A f
 In accordance with the APS policy on the appropriate use of AI tools, the revised manuscript discloses in the Acknowledgments that large-language-model assistants (Claude, Anthropic, Opus 4 series; Codex, OpenAI, GPT-5 series) were used to assist with developing and debugging the analysis code, to provide separate numerical cross-checks, and to revise the manuscript text; the verification pass above was carried out within that workflow. I directed each use, checked numerical outputs against the archived analysis scripts and data, reviewed all text revisions, and take full responsibility for all content.
 
 In light of Referee A's assessment of the technical quality and the potential breadth of this work, I respectfully ask that the revised manuscript be reconsidered for publication in Physical Review Letters.
+
+Sincerely,
+
+Jin Lei
+School of Physics Science and Engineering, Tongji University, Shanghai 200092, China
+Southern Center for Nuclear-Science Theory (SCNT), Institute of Modern Physics, Chinese Academy of Sciences, Huizhou 516000, Guangdong Province, China
